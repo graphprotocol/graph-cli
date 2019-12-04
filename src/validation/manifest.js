@@ -199,6 +199,55 @@ const validateValue = (value, ctx) => {
   }
 }
 
+const validateManifest = (value, type, schema, { resolveFile }) => {
+  return value !== null && value !== undefined
+    ? validateValue(
+        immutable.fromJS(value),
+        immutable.fromJS({
+          schema: schema,
+          type: type,
+          path: [],
+          errors: [],
+          resolveFile,
+        }),
+      )
+    : immutable.fromJS([
+        {
+          path: [],
+          message: `Expected non-empty value, found ${typeName(value)}:\n  ${value}`,
+        },
+      ])
+}
+
+const validateResolverKind = value => {
+  let supportedKinds = ['javascript']
+  if (supportedKinds.indexOf(value.mutations.resolvers.kind) === -1) {
+    return immutable.fromJS([
+      {
+        path: [],
+        message: `Requested resolver kind ${value.mutations.resolvers.kind} is not supported. `
+        + `Please use one of the following supported kind's: ${supportedKinds}`
+      }
+    ])
+  } else {
+    return null
+  }
+}
+
+const validateMutationsManifest = (value, type, schema, { resolveFile }) => {
+  // Validate manifest using the GraphQL schema that defines its structure
+  let errors = validateManifest(value, type, schema, { resolveFile })
+
+  // Fail early because a broken manifest prevents us from performing
+  // additional validation steps
+  if (!errors.isEmpty()) {
+    return errors
+  }
+
+  // Validate that we support the resolver kind they're requesting
+  return validateResolverKind(value)
+}
+
 const validateDataSourceNetworks = value => {
   let networks = [...value.dataSources, ...(value.templates || [])]
     .filter(dataSource => dataSource.kind === 'ethereum/contract')
@@ -231,26 +280,9 @@ Recommendation: Make all data sources and templates use the same network name.`,
     : List()
 }
 
-const validateManifest = (value, type, schema, { resolveFile }) => {
+const validateSubgraphManifest = (value, type, schema, { resolveFile }) => {
   // Validate manifest using the GraphQL schema that defines its structure
-  let errors =
-    value !== null && value !== undefined
-      ? validateValue(
-          immutable.fromJS(value),
-          immutable.fromJS({
-            schema: schema,
-            type: type,
-            path: [],
-            errors: [],
-            resolveFile,
-          }),
-        )
-      : immutable.fromJS([
-          {
-            path: [],
-            message: `Expected non-empty value, found ${typeName(value)}:\n  ${value}`,
-          },
-        ])
+  let errors = validateManifest(value, type, schema, { resolveFile })
 
   // Fail early because a broken manifest prevents us from performing
   // additional validation steps
@@ -263,4 +295,4 @@ const validateManifest = (value, type, schema, { resolveFile }) => {
   return validateDataSourceNetworks(value)
 }
 
-module.exports = { validateManifest }
+module.exports = { validateSubgraphManifest, validateMutationsManifest }

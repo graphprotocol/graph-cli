@@ -1,4 +1,5 @@
 module.exports = {
   validateSchema: require('./schema').validateSchema,
-  validateManifest: require('./manifest').validateManifest,
+  validateSubgraphManifest: require('./manifest').validateSubgraphManifest,
+  validateMutationsManifest: require('./manifest').validateMutationsManifest
 }

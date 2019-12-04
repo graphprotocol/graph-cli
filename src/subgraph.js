@@ -51,7 +51,32 @@ module.exports = class Subgraph {
     })
 
     // Validate the subgraph manifest using this schema
-    return validation.validateManifest(data, rootType, schema, { resolveFile })
+    let errors = validation.validateSubgraphManifest(data, rootType, schema, { resolveFile })
+
+    if (!errors.isEmpty()) {
+      return errors;
+    }
+
+    // If the subgraph manifest contains a mutations project
+    if (data.mutations) {
+      // Fetch the mutation's manifest file
+      let file = resolveFile(data.mutations.file)
+
+      // Load and validate the manifest's yaml
+      let mutationsData = yaml.parse(fs.readFileSync(file))
+
+      // Obtain the root 'MutationsManifest' type from the schema
+      rootType = schema.definitions.find(definition => {
+        return definition.name.value === 'MutationsManifest'
+      })
+
+      // Validate the mutation manifest using this schema
+      errors = validation.validateMutationManifest(
+        mutationsData, rootType, schema, { resolveFile }
+      )
+    }
+
+    return errors;
   }
 
   static validateSchema(manifest, { resolveFile }) {
