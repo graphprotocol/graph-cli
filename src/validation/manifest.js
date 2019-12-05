@@ -177,6 +177,7 @@ const validators = immutable.fromJS({
 })
 
 const validateValue = (value, ctx) => {
+
   let kind = ctx.getIn(['type', 'kind'])
   let validator = validators.get(kind)
 
@@ -230,7 +231,7 @@ const validateResolverKind = value => {
       }
     ])
   } else {
-    return null
+    return List()
   }
 }
 

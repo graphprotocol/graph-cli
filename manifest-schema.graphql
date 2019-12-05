@@ -96,7 +96,7 @@ type JavascriptResolvers {
 type MutationsManifest {
   specVersion: String!
   repository: String
-  mutations: MutationResolvers!
+  mutations: Mutations!
 }
 
 type Mutations {

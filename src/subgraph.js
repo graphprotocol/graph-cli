@@ -41,6 +41,7 @@ const buildCombinedWarning = (filename, warnings) =>
 module.exports = class Subgraph {
   static validate(data, { resolveFile }) {
     // Parse the default subgraph schema
+
     let schema = graphql.parse(
       fs.readFileSync(path.join(__dirname, '..', 'manifest-schema.graphql'), 'utf-8'),
     )
@@ -59,11 +60,13 @@ module.exports = class Subgraph {
 
     // If the subgraph manifest contains a mutations project
     if (data.mutations) {
+
       // Fetch the mutation's manifest file
       let file = resolveFile(data.mutations.file)
 
       // Load and validate the manifest's yaml
-      let mutationsData = yaml.parse(fs.readFileSync(file))
+      let mutationsData = yaml.parse(fs.readFileSync(file, 'utf-8'))
+
 
       // Obtain the root 'MutationsManifest' type from the schema
       rootType = schema.definitions.find(definition => {
@@ -71,9 +74,10 @@ module.exports = class Subgraph {
       })
 
       // Validate the mutation manifest using this schema
-      errors = validation.validateMutationManifest(
+      errors = validation.validateMutationsManifest(
         mutationsData, rootType, schema, { resolveFile }
       )
+
     }
 
     return errors;
