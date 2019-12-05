@@ -67,6 +67,11 @@ module.exports = class Subgraph {
       // Load and validate the manifest's yaml
       let mutationsData = yaml.parse(fs.readFileSync(file, 'utf-8'))
 
+      // TODO: get directory of file, make new root directory for resolveFile
+      // const mutationResolveFile = { ... }
+
+      // TODO: FIRST! figure out why error message has wrong filename (subgraph.yaml) &
+      // wrong "path:". Look into ctx within validate step.
 
       // Obtain the root 'MutationsManifest' type from the schema
       rootType = schema.definitions.find(definition => {
@@ -474,6 +479,11 @@ More than one template named '${name}', template names must be unique.`,
     if (errors.size > 0) {
       throwCombinedError(filename, errors)
     }
+
+    // TODO: move everything out of the validate function into this function
+    // check to see if we have mutations
+    // Mutations.validate(data, { resolve })
+    // TODO: validate mutation's schema here as well (need to embed the subgraph's schema)
 
     // Perform warning validations
     let warnings = skipValidation

@@ -206,6 +206,10 @@ class Compiler {
               ),
         )
 
+        // TODO: add compile mutations (if they're present)
+        // 1. upload mutations.yaml schema.file & resolvers.file to IPFS + store hash
+        // 2. upload new mutations.yaml to IPFS & store hash in subgraph.yaml
+
         return subgraph
       },
     )
