@@ -19,7 +19,7 @@ class Compiler {
     this.ipfs = options.ipfs
     this.sourceDir = path.dirname(options.subgraphManifest)
 
-    process.on('uncaughtException', function(e) {
+    process.on('uncaughtException', function (e) {
       toolbox.print.error(`UNCAUGHT EXCEPTION: ${e}`)
     })
   }
@@ -191,24 +191,22 @@ class Compiler {
           ),
         )
 
-        subgraph = subgraph.update('templates', templates =>
-          templates === undefined
+        subgraph = subgraph.update('templates', templates => {
+          return templates === undefined
             ? templates
             : templates.map(template =>
-                template.updateIn(['mapping', 'file'], mappingPath =>
-                  this._compileTemplateMapping(
-                    template,
-                    mappingPath,
-                    compiledFiles,
-                    spinner,
-                  ),
+              template.updateIn(['mapping', 'file'], mappingPath =>
+                this._compileTemplateMapping(
+                  template,
+                  mappingPath,
+                  compiledFiles,
+                  spinner,
                 ),
               ),
-        )
+            )
+        })
 
-        // TODO: add compile mutations (if they're present)
-        // 1. upload mutations.yaml schema.file & resolvers.file to IPFS + store hash
-        // 2. upload new mutations.yaml to IPFS & store hash in subgraph.yaml
+        //are manifest files meant to be kept separate in the end?
 
         return subgraph
       },
@@ -398,7 +396,7 @@ class Compiler {
   async writeSubgraphToOutputDirectory(subgraph) {
     const displayDir = `${this.displayPath(this.options.outputDir)}${
       toolbox.filesystem.separator
-    }`
+      }`
 
     return await withSpinner(
       `Write compiled subgraph to ${displayDir}`,
@@ -455,33 +453,33 @@ class Compiler {
           return templates === undefined
             ? templates
             : templates.map(template =>
-                template
-                  // Write template ABIs to the output directory
-                  .updateIn(['mapping', 'abis'], abis =>
-                    abis.map(abi =>
-                      abi.update('file', abiFile => {
-                        abiFile = path.resolve(this.sourceDir, abiFile)
-                        let abiData = ABI.load(abi.get('name'), abiFile)
-                        return path.relative(
-                          this.options.outputDir,
-                          this._writeSubgraphFile(
-                            abiFile,
-                            JSON.stringify(abiData.data.toJS(), null, 2),
-                            this.sourceDir,
-                            this.subgraphDir(this.options.outputDir, template),
-                            spinner,
-                          ),
-                        )
-                      }),
-                    ),
-                  )
-
-                  // The mapping file is already being written to the output
-                  // directory by the AssemblyScript compiler
-                  .updateIn(['mapping', 'file'], mappingFile =>
-                    path.relative(this.options.outputDir, mappingFile),
+              template
+                // Write template ABIs to the output directory
+                .updateIn(['mapping', 'abis'], abis =>
+                  abis.map(abi =>
+                    abi.update('file', abiFile => {
+                      abiFile = path.resolve(this.sourceDir, abiFile)
+                      let abiData = ABI.load(abi.get('name'), abiFile)
+                      return path.relative(
+                        this.options.outputDir,
+                        this._writeSubgraphFile(
+                          abiFile,
+                          JSON.stringify(abiData.data.toJS(), null, 2),
+                          this.sourceDir,
+                          this.subgraphDir(this.options.outputDir, template),
+                          spinner,
+                        ),
+                      )
+                    }),
                   ),
-              )
+                )
+
+                // The mapping file is already being written to the output
+                // directory by the AssemblyScript compiler
+                .updateIn(['mapping', 'file'], mappingFile =>
+                  path.relative(this.options.outputDir, mappingFile),
+                ),
+            )
         })
 
         // Write the subgraph manifest itself
@@ -559,6 +557,28 @@ class Compiler {
             keyPath: ['templates', i, 'mapping', 'file'],
             value: await this._uploadFileToIPFS(
               template.getIn(['mapping', 'file']),
+              uploadedFiles,
+              spinner,
+            ),
+          })
+        }
+
+        //Upload mutations schema and resolvers if present
+
+        if(subgraph.get('mutations')){
+          updates.push({
+            keyPath: ['mutations', 'mutations','schema','file'],
+            value: await this._uploadFileToIPFS(
+              subgraph.getIn(['mutations', 'mutations','schema','file']),
+              uploadedFiles,
+              spinner,
+            ),
+          });
+
+          updates.push({
+            keyPath: ['mutations', 'mutations','resolvers','file'],
+            value: await this._uploadFileToIPFS(
+              subgraph.getIn(['mutations', 'mutations','resolvers','file']),
               uploadedFiles,
               spinner,
             ),

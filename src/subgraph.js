@@ -15,9 +15,9 @@ const throwCombinedError = (filename, errors) => {
 
   Path: ${e.get('path').size === 0 ? '/' : e.get('path').join(' > ')}
   ${e
-    .get('message')
-    .split('\n')
-    .join('\n  ')}`,
+          .get('message')
+          .split('\n')
+          .join('\n  ')}`,
       `Error in ${path.relative(process.cwd(), filename)}:`,
     ),
   )
@@ -26,16 +26,16 @@ const throwCombinedError = (filename, errors) => {
 const buildCombinedWarning = (filename, warnings) =>
   warnings.size > 0
     ? warnings.reduce(
-        (msg, w) =>
-          `${msg}
+      (msg, w) =>
+        `${msg}
   
     Path: ${w.get('path').size === 0 ? '/' : w.get('path').join(' > ')}
     ${w
-      .get('message')
-      .split('\n')
-      .join('\n    ')}`,
-        `Warnings in ${path.relative(process.cwd(), filename)}:`,
-      ) + '\n'
+          .get('message')
+          .split('\n')
+          .join('\n    ')}`,
+      `Warnings in ${path.relative(process.cwd(), filename)}:`,
+    ) + '\n'
     : null
 
 module.exports = class Subgraph {
@@ -59,31 +59,32 @@ module.exports = class Subgraph {
     }
 
     // If the subgraph manifest contains a mutations project
-    if (data.mutations) {
 
-      // Fetch the mutation's manifest file
-      let file = resolveFile(data.mutations.file)
+    // if (data.mutations) {
 
-      // Load and validate the manifest's yaml
-      let mutationsData = yaml.parse(fs.readFileSync(file, 'utf-8'))
+    //   // Fetch the mutation's manifest file
+    //   let file = resolveFile(data.mutations.file)
 
-      // TODO: get directory of file, make new root directory for resolveFile
-      // const mutationResolveFile = { ... }
+    //   // Load and validate the manifest's yaml
+    //   let mutationsData = yaml.parse(fs.readFileSync(file, 'utf-8'))
 
-      // TODO: FIRST! figure out why error message has wrong filename (subgraph.yaml) &
-      // wrong "path:". Look into ctx within validate step.
+    //   // TODO: get directory of file, make new root directory for resolveFile
+    //   // const mutationResolveFile = { ... }
 
-      // Obtain the root 'MutationsManifest' type from the schema
-      rootType = schema.definitions.find(definition => {
-        return definition.name.value === 'MutationsManifest'
-      })
+    //   // TODO: FIRST! figure out why error message has wrong filename (subgraph.yaml) &
+    //   // wrong "path:". Look into ctx within validate step.
 
-      // Validate the mutation manifest using this schema
-      errors = validation.validateMutationsManifest(
-        mutationsData, rootType, schema, { resolveFile }
-      )
+    //   // Obtain the root 'MutationsManifest' type from the schema
+    //   rootType = schema.definitions.find(definition => {
+    //     return definition.name.value === 'MutationsManifest'
+    //   })
 
-    }
+    //   // Validate the mutation manifest using this schema
+    //   errors = validation.validateMutationsManifest(
+    //     mutationsData, rootType, schema, { resolveFile }
+    //   )
+
+    // }
 
     return errors;
   }
@@ -101,14 +102,42 @@ module.exports = class Subgraph {
 
   ${entity}:
   ${errors
-    .map(error =>
-      error
-        .get('message')
-        .split('\n')
-        .join('\n    '),
-    )
-    .map(msg => `- ${msg}`)
-    .join('\n  ')}`,
+            .map(error =>
+              error
+                .get('message')
+                .split('\n')
+                .join('\n    '),
+            )
+            .map(msg => `- ${msg}`)
+            .join('\n  ')}`,
+        `Error in ${path.relative(process.cwd(), filename)}:`,
+      )
+
+      throw new Error(msg)
+    }
+  }
+
+  static validateMutationSchema(manifest, { resolveFile }) {
+    let filename = resolveFile(manifest.getIn(['mutations','schema', 'file']))
+    let errors = validation.validateMutationSchema(filename)
+
+    if (errors.size > 0) {
+      errors = errors.groupBy(error => error.get('entity')).sort()
+
+      let msg = errors.reduce(
+        (msg, errors, entity) =>
+          `${msg}
+
+  ${entity}:
+  ${errors
+            .map(error =>
+              error
+                .get('message')
+                .split('\n')
+                .join('\n    '),
+            )
+            .map(msg => `- ${msg}`)
+            .join('\n  ')}`,
         `Error in ${path.relative(process.cwd(), filename)}:`,
       )
 
@@ -123,8 +152,8 @@ module.exports = class Subgraph {
         (dataSources, dataSource, dataSourceIndex) =>
           dataSource.get('kind') === 'ethereum/contract'
             ? dataSources.push(
-                immutable.Map({ path: ['dataSources', dataSourceIndex], dataSource }),
-              )
+              immutable.Map({ path: ['dataSources', dataSourceIndex], dataSource }),
+            )
             : dataSources,
         immutable.List(),
       )
@@ -135,11 +164,11 @@ module.exports = class Subgraph {
       (templates, template, templateIndex) =>
         template.get('kind') === 'ethereum/contract'
           ? templates.push(
-              immutable.Map({
-                path: ['templates', templateIndex],
-                dataSource: template,
-              }),
-            )
+            immutable.Map({
+              path: ['templates', templateIndex],
+              dataSource: template,
+            }),
+          )
           : templates,
       immutable.List(),
     )
@@ -153,17 +182,17 @@ module.exports = class Subgraph {
     let nameErrors = abiNames.includes(abiName)
       ? immutable.List()
       : immutable.fromJS([
-          {
-            path: [...path, 'source', 'abi'],
-            message: `\
+        {
+          path: [...path, 'source', 'abi'],
+          message: `\
 ABI name '${abiName}' not found in mapping > abis.
 Available ABIs:
 ${abiNames
-  .sort()
-  .map(name => `- ${name}`)
-  .join('\n')}`,
-          },
-        ])
+              .sort()
+              .map(name => `- ${name}`)
+              .join('\n')}`,
+        },
+      ])
 
     // Validate that all ABI files are valid
     let fileErrors = dataSource
@@ -262,17 +291,17 @@ Must be 40 hexadecimal characters, with an optional '0x' prefix.`,
         abiEvents.includes(manifestEvent)
           ? errors
           : errors.push(
-              immutable.fromJS({
-                path: [...path, 'eventHandlers', index],
-                message: `\
+            immutable.fromJS({
+              path: [...path, 'eventHandlers', index],
+              message: `\
 Event with signature '${manifestEvent}' not present in ABI '${abi.name}'.
 Available events:
 ${abiEvents
-  .sort()
-  .map(event => `- ${event}`)
-  .join('\n')}`,
-              }),
-            ),
+                  .sort()
+                  .map(event => `- ${event}`)
+                  .join('\n')}`,
+            }),
+          ),
       immutable.List(),
     )
   }
@@ -329,17 +358,17 @@ ${abiEvents
             abiFunctions.includes(manifestFunction)
               ? errors
               : errors.push(
-                  immutable.fromJS({
-                    path: [...path, index],
-                    message: `\
+                immutable.fromJS({
+                  path: [...path, index],
+                  message: `\
 Call function with signature '${manifestFunction}' not present in ABI '${abi.name}'.
 Available call functions:
 ${abiFunctions
-  .sort()
-  .map(tx => `- ${tx}`)
-  .join('\n')}`,
-                  }),
-                ),
+                      .sort()
+                      .map(tx => `- ${tx}`)
+                      .join('\n')}`,
+                }),
+              ),
           errors,
         )
       }, immutable.List())
@@ -350,26 +379,26 @@ ${abiFunctions
       'https://github.com/graphprotocol/example-subgraph'
       ? immutable.List()
       : immutable.List().push(
-          immutable.fromJS({
-            path: ['repository'],
-            message: `\
+        immutable.fromJS({
+          path: ['repository'],
+          message: `\
 The repository is still set to https://github.com/graphprotocol/example-subgraph.
 Please replace it with a link to your subgraph source code.`,
-          }),
-        )
+        }),
+      )
   }
 
   static validateDescription(manifest, { resolveFile }) {
     return manifest.get('description') !== 'Gravatar for Ethereum'
       ? immutable.List()
       : immutable.List().push(
-          immutable.fromJS({
-            path: ['description'],
-            message: `\
+        immutable.fromJS({
+          path: ['description'],
+          message: `\
 The description is still the one from the example subgraph.
 Please update it to tell users more about your subgraph.`,
-          }),
-        )
+        }),
+      )
   }
 
   static validateEthereumContractHandlers(manifest) {
@@ -388,13 +417,13 @@ Please update it to tell users more about your subgraph.`,
           callHandlers.isEmpty() &&
           eventHandlers.isEmpty()
           ? errors.push(
-              immutable.fromJS({
-                path: path,
-                message: `\
+            immutable.fromJS({
+              path: path,
+              message: `\
 Mapping has no blockHandlers, callHandlers or eventHandlers.
 At least one such handler must be defined.`,
-              }),
-            )
+            }),
+          )
           : errors
       }, immutable.List())
   }
@@ -467,32 +496,65 @@ More than one template named '${name}', template names must be unique.`,
     let errors = skipValidation
       ? immutable.List()
       : immutable.List.of(
-          ...Subgraph.validateAbis(manifest, { resolveFile }),
-          ...Subgraph.validateContractAddresses(manifest),
-          ...Subgraph.validateEthereumContractHandlers(manifest),
-          ...Subgraph.validateEvents(manifest, { resolveFile }),
-          ...Subgraph.validateCallFunctions(manifest, { resolveFile }),
-          ...Subgraph.validateUniqueDataSourceNames(manifest),
-          ...Subgraph.validateUniqueTemplateNames(manifest),
-        )
+        ...Subgraph.validateAbis(manifest, { resolveFile }),
+        ...Subgraph.validateContractAddresses(manifest),
+        ...Subgraph.validateEthereumContractHandlers(manifest),
+        ...Subgraph.validateEvents(manifest, { resolveFile }),
+        ...Subgraph.validateCallFunctions(manifest, { resolveFile }),
+        ...Subgraph.validateUniqueDataSourceNames(manifest),
+        ...Subgraph.validateUniqueTemplateNames(manifest),
+      )
+
+    if (data.mutations) {
+
+      // Fetch the mutation's manifest file
+      let file = resolveFile(data.mutations.file)
+
+      // Load and validate the manifest's yaml
+      let mutationsData = yaml.parse(fs.readFileSync(file, 'utf-8'))
+
+      // Validate mutations.yaml schema
+      let mutationsManifest = immutable.fromJS(mutationsData);
+
+      Subgraph.validateMutationSchema(mutationsManifest, {resolveFile})
+
+      let schema = graphql.parse(
+        fs.readFileSync(path.join(__dirname, '..', 'manifest-schema.graphql'), 'utf-8'),
+      )
+
+      // Obtain the root 'MutationsManifest' type from the schema
+      let rootType = schema.definitions.find(definition => {
+        return definition.name.value === 'MutationsManifest'
+      })
+
+      // Validate the mutation manifest using this schema
+      errors = validation.validateMutationsManifest(
+        mutationsData, rootType, schema, { resolveFile }
+      )
+
+      errors = validation.validateMutationResolvers(
+        mutationsManifest.getIn(['mutations','resolvers','file'])
+      )
+
+      //If no errors, bring mutations.yaml file data to top schema
+      manifest = manifest.update('mutations', () => 
+        mutationsManifest
+      )
+
+    }
 
     if (errors.size > 0) {
       throwCombinedError(filename, errors)
     }
 
-    // TODO: move everything out of the validate function into this function
-    // check to see if we have mutations
-    // Mutations.validate(data, { resolve })
-    // TODO: validate mutation's schema here as well (need to embed the subgraph's schema)
-
     // Perform warning validations
     let warnings = skipValidation
       ? immutable.List()
       : immutable.List.of(
-          ...Subgraph.validateRepository(manifest, { resolveFile }),
-          ...Subgraph.validateDescription(manifest, { resolveFile }),
-          ...Subgraph.validateEthereumContractHandlers(manifest),
-        )
+        ...Subgraph.validateRepository(manifest, { resolveFile }),
+        ...Subgraph.validateDescription(manifest, { resolveFile }),
+        ...Subgraph.validateEthereumContractHandlers(manifest),
+      )
 
     return {
       result: manifest,

@@ -67,12 +67,12 @@ const validateEntityDirective = def =>
   def.directives.find(directive => directive.name.value === 'entity')
     ? List()
     : immutable.fromJS([
-        {
-          loc: def.loc,
-          entity: def.name.value,
-          message: `Defined without @entity directive`,
-        },
-      ])
+      {
+        loc: def.loc,
+        entity: def.name.value,
+        message: `Defined without @entity directive`,
+      },
+    ])
 
 const validateEntityID = def => {
   let idField = def.fields.find(field => field.name.value === 'id')
@@ -106,22 +106,22 @@ const validateEntityID = def => {
 
 const validateListFieldType = (def, field) =>
   field.type.kind === 'NonNullType' &&
-  field.type.kind === 'ListType' &&
-  field.type.type.kind !== 'NonNullType'
+    field.type.kind === 'ListType' &&
+    field.type.type.kind !== 'NonNullType'
     ? immutable.fromJS([
-        {
-          loc: field.loc,
-          entity: def.name.value,
-          message: `\
+      {
+        loc: field.loc,
+        entity: def.name.value,
+        message: `\
 Field '${field.name.value}':
 Field has type [${field.type.type.name.value}]! but
 must have type [${field.type.type.name.value}!]!
 
 Reason: Lists with null elements are not supported.`,
-        },
-      ])
+      },
+    ])
     : field.type.kind === 'ListType' && field.type.type.kind !== 'NonNullType'
-    ? immutable.fromJS([
+      ? immutable.fromJS([
         {
           loc: field.loc,
           entity: def.name.value,
@@ -133,7 +133,7 @@ must have type [${field.type.type.name.value}!]
 Reason: Lists with null elements are not supported.`,
         },
       ])
-    : List()
+      : List()
 
 const unwrapType = type => {
   let innerTypeFromList = listType =>
@@ -150,8 +150,8 @@ const unwrapType = type => {
   return type.kind === 'NonNullType'
     ? innerTypeFromNonNull(type)
     : type.kind === 'ListType'
-    ? innerTypeFromList(type)
-    : type
+      ? innerTypeFromList(type)
+      : type
 }
 
 const entityTypeByName = (defs, name) =>
@@ -194,16 +194,16 @@ const validateInnerFieldType = (defs, def, field) => {
   return availableTypes.includes(typeName)
     ? List()
     : immutable.fromJS([
-        {
-          loc: field.loc,
-          entity: def.name.value,
-          message: `\
+      {
+        loc: field.loc,
+        entity: def.name.value,
+        message: `\
 Field '${field.name.value}': \
 Unknown type '${typeName}'.${
-            suggestion !== undefined ? ` Did you mean '${suggestion}'?` : ''
+          suggestion !== undefined ? ` Did you mean '${suggestion}'?` : ''
           }`,
-        },
-      ])
+      },
+    ])
 }
 
 const validateEntityFieldType = (defs, def, field) =>
@@ -215,14 +215,14 @@ const validateEntityFieldType = (defs, def, field) =>
 const validateEntityFieldArguments = (defs, def, field) =>
   field.arguments.length > 0
     ? immutable.fromJS([
-        {
-          loc: field.loc,
-          entity: def.name.value,
-          message: `\
+      {
+        loc: field.loc,
+        entity: def.name.value,
+        message: `\
 Field '${field.name.value}': \
 Field arguments are not supported.`,
-        },
-      ])
+      },
+    ])
     : List()
 
 const entityFieldExists = (entityDef, name) =>
@@ -345,4 +345,40 @@ const validateSchema = filename => {
   return validateTypeDefinitions(schema.definitions)
 }
 
-module.exports = { typeSuggestion, validateSchema }
+const validateMutationEntityFields = (defs, def) =>
+  def.fields.reduce(
+    (errors, field) =>
+      errors
+        .concat(validateEntityFieldType(defs, def, field))
+        .concat(validateEntityFieldDirectives(defs, def, field)),
+    List(),
+  )
+
+const mutationTypeDefinitionValidators = {
+  ObjectTypeDefinition: (defs, def) =>
+    List.of(
+      ...validateMutationEntityFields(defs, def),
+    ),
+}
+
+const validateMutationTypeDefinition = (defs, def) =>
+  typeDefinitionValidators[def.kind] !== undefined
+    ? mutationTypeDefinitionValidators[def.kind](defs, def)
+    : List()
+
+const validateMutationTypeDefinitions = defs =>
+  defs.reduce((errors, def) => errors.concat(validateMutationTypeDefinition(defs, def)), List())
+
+
+const validateMutationSchema = filename => {
+  let doc = loadSchema(filename)
+  let schema = parseSchema(doc)
+  return validateMutationTypeDefinitions(schema.definitions)
+}
+
+
+
+
+
+
+module.exports = { typeSuggestion, validateSchema, validateMutationSchema }
