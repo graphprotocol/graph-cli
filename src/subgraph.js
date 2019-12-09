@@ -58,33 +58,8 @@ module.exports = class Subgraph {
       return errors;
     }
 
-    // If the subgraph manifest contains a mutations project
-
-    // if (data.mutations) {
-
-    //   // Fetch the mutation's manifest file
-    //   let file = resolveFile(data.mutations.file)
-
-    //   // Load and validate the manifest's yaml
-    //   let mutationsData = yaml.parse(fs.readFileSync(file, 'utf-8'))
-
-    //   // TODO: get directory of file, make new root directory for resolveFile
-    //   // const mutationResolveFile = { ... }
-
     //   // TODO: FIRST! figure out why error message has wrong filename (subgraph.yaml) &
     //   // wrong "path:". Look into ctx within validate step.
-
-    //   // Obtain the root 'MutationsManifest' type from the schema
-    //   rootType = schema.definitions.find(definition => {
-    //     return definition.name.value === 'MutationsManifest'
-    //   })
-
-    //   // Validate the mutation manifest using this schema
-    //   errors = validation.validateMutationsManifest(
-    //     mutationsData, rootType, schema, { resolveFile }
-    //   )
-
-    // }
 
     return errors;
   }
