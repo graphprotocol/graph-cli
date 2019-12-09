@@ -516,7 +516,10 @@ More than one template named '${name}', template names must be unique.`,
       // Validate mutations.yaml schema
       let mutationsManifest = immutable.fromJS(mutationsData);
 
-      Subgraph.validateMutationSchema(mutationsManifest, {resolveFile})
+      let resolveMutationsFile = maybeRelativeFile =>
+        path.resolve(path.dirname(file), maybeRelativeFile)
+
+      Subgraph.validateMutationSchema(mutationsManifest, { resolveFile: resolveMutationsFile})
 
       let schema = graphql.parse(
         fs.readFileSync(path.join(__dirname, '..', 'manifest-schema.graphql'), 'utf-8'),
@@ -529,7 +532,7 @@ More than one template named '${name}', template names must be unique.`,
 
       // Validate the mutation manifest using this schema
       errors = validation.validateMutationsManifest(
-        mutationsData, rootType, schema, { resolveFile }
+        mutationsData, rootType, schema, { resolveFile: resolveMutationsFile }
       )
 
       errors = validation.validateMutationResolvers(
