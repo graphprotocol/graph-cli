@@ -564,25 +564,21 @@ class Compiler {
         }
 
         //Upload mutations schema and resolvers if present
-
         if(subgraph.get('mutations')){
-          updates.push({
-            keyPath: ['mutations', 'mutations','schema','file'],
-            value: await this._uploadFileToIPFS(
-              subgraph.getIn(['mutations', 'mutations','schema','file']),
-              uploadedFiles,
-              spinner,
-            ),
-          });
+          const filePaths = [];
+          files.push(['mutations', 'schema', 'file']);
+          files.push(['mutations', 'resolvers','file']);
 
-          updates.push({
-            keyPath: ['mutations', 'mutations','resolvers','file'],
-            value: await this._uploadFileToIPFS(
-              subgraph.getIn(['mutations', 'mutations','resolvers','file']),
-              uploadedFiles,
-              spinner,
-            ),
-          })
+          for (const path of filePaths) {
+            updates.push({
+              keyPath: path,
+              value: await this._uploadFileToIPFS(
+                subgraph.getIn(path),
+                uploadedFiles,
+                spinner,
+              ),
+            });
+          }
         }
 
         // Apply all updates to the subgraph

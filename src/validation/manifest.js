@@ -51,13 +51,46 @@ const validators = immutable.fromJS({
   ScalarTypeDefinition: (value, ctx) =>
     validators.get(ctx.getIn(['type', 'name', 'value']))(value, ctx),
 
-  UnionTypeDefinition: (value, ctx) =>
-    ctx
+  UnionTypeDefinition: (value, ctx) => {
+    console.log("HERERERER")
+    console.log(JSON.stringify(value, null, 2))
+    console.log(ctx.get('path'))
+    const typeDeducers = {
+      "mutations": (value) => {
+        if (value.file) {
+
+        } else {
+
+        }
+      },
+      "mutations.resolvers": (value) => {
+        if (value.kind === "javascript") {
+
+        } else {
+
+        }
+      },
+      "dataSources[$0]": (value) => {
+        if (value.kind === "") {
+
+        } else {
+
+        }
+      }
+    }
+
+    // 1. for the path ctx.get(path)
+    // 2. reduce what type it should be
+    // 3. verify type is in ctx.type.types
+    // 4. set type & call validateValue
+
+    /*ctx
       .getIn(['type', 'types'])
       .reduce(
         (errors, type) => errors.concat(validateValue(value, ctx.set('type', type))),
         List(),
-      ),
+      )*/
+  },
 
   NamedType: (value, ctx) =>
     validateValue(
@@ -200,53 +233,22 @@ const validateValue = (value, ctx) => {
   }
 }
 
-const validateManifest = (value, type, schema, { resolveFile }) => {
-  return value !== null && value !== undefined
-    ? validateValue(
-        immutable.fromJS(value),
-        immutable.fromJS({
-          schema: schema,
-          type: type,
-          path: [],
-          errors: [],
-          resolveFile,
-        }),
-      )
-    : immutable.fromJS([
+const validateMutationResolverKind = value => {
+  let supportedKinds = ['javascript']
+
+  if (value.mutations && value.mutations.resolvers) {
+    if (supportedKinds.indexOf(value.mutations.resolvers.kind) === -1) {
+      return immutable.fromJS([
         {
           path: [],
-          message: `Expected non-empty value, found ${typeName(value)}:\n  ${value}`,
-        },
+          message: `Requested resolver kind ${value.mutations.resolvers.kind} is not supported. `
+          + `Please use one of the following supported kind's: ${supportedKinds}`
+        }
       ])
-}
-
-const validateResolverKind = value => {
-  let supportedKinds = ['javascript']
-  if (supportedKinds.indexOf(value.mutations.resolvers.kind) === -1) {
-    return immutable.fromJS([
-      {
-        path: [],
-        message: `Requested resolver kind ${value.mutations.resolvers.kind} is not supported. `
-        + `Please use one of the following supported kind's: ${supportedKinds}`
-      }
-    ])
-  } else {
-    return List()
-  }
-}
-
-const validateMutationsManifest = (value, type, schema, { resolveFile }) => {
-  // Validate manifest using the GraphQL schema that defines its structure
-  let errors = validateManifest(value, type, schema, { resolveFile })
-
-  // Fail early because a broken manifest prevents us from performing
-  // additional validation steps
-  if (!errors.isEmpty()) {
-    return errors
+    }
   }
 
-  // Validate that we support the resolver kind they're requesting
-  return validateResolverKind(value)
+  return List()
 }
 
 const validateDataSourceNetworks = value => {
@@ -281,9 +283,26 @@ Recommendation: Make all data sources and templates use the same network name.`,
     : List()
 }
 
-const validateSubgraphManifest = (value, type, schema, { resolveFile }) => {
+const validateManifest = (value, type, schema, { resolveFile }) => {
+  value
   // Validate manifest using the GraphQL schema that defines its structure
-  let errors = validateManifest(value, type, schema, { resolveFile })
+  let errors = value !== null && value !== undefined
+    ? validateValue(
+        immutable.fromJS(value),
+        immutable.fromJS({
+          schema: schema,
+          type: type,
+          path: [],
+          errors: [],
+          resolveFile,
+        }),
+      )
+    : immutable.fromJS([
+        {
+          path: [],
+          message: `Expected non-empty value, found ${typeName(value)}:\n  ${value}`,
+        },
+      ])
 
   // Fail early because a broken manifest prevents us from performing
   // additional validation steps
@@ -293,7 +312,14 @@ const validateSubgraphManifest = (value, type, schema, { resolveFile }) => {
 
   // Validate that all data sources are for the same `network` (this includes
   // _no_ network at all)
-  return validateDataSourceNetworks(value)
+  errors = validateDataSourceNetworks(value)
+
+  if (!errors.isEmpty()) {
+    return errors
+  }
+
+  // Validate that we support the mutation resolver kind they're requesting
+  return validateMutationResolverKind(value)
 }
 
-module.exports = { validateSubgraphManifest, validateMutationsManifest }
+module.exports = { validateManifest }

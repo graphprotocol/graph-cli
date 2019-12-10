@@ -47,9 +47,13 @@ const typeSuggestion = typeName =>
     return typeof pattern === 'string' ? pattern === typeName : typeName.match(pattern)
   }).map(([_, suggestion]) => suggestion)[0]
 
-const loadSchema = filename => {
+const loadSchema = filenames => {
   try {
-    return fs.readFileSync(filename, 'utf-8')
+    let result = ""
+    for (filename of filenames) {
+      result += fs.readFileSync(filename, 'utf-8')
+    }
+    return result;
   } catch (e) {
     throw new Error(`Failed to load GraphQL schema: ${e}`)
   }
@@ -339,46 +343,15 @@ const validateTypeDefinition = (defs, def) =>
 const validateTypeDefinitions = defs =>
   defs.reduce((errors, def) => errors.concat(validateTypeDefinition(defs, def)), List())
 
-const validateSchema = filename => {
-  let doc = loadSchema(filename)
+const validateSchema = (filenames, ignoreEntityValidation) => {
+  let doc = loadSchema(filenames)
   let schema = parseSchema(doc)
-  return validateTypeDefinitions(schema.definitions)
+
+  if (ignoreEntityValidation) {
+    return List()
+  } else {
+    return validateTypeDefinitions(schema.definitions)
+  }
 }
 
-const validateMutationEntityFields = (defs, def) =>
-  def.fields.reduce(
-    (errors, field) =>
-      errors
-        .concat(validateEntityFieldType(defs, def, field))
-        .concat(validateEntityFieldDirectives(defs, def, field)),
-    List(),
-  )
-
-const mutationTypeDefinitionValidators = {
-  ObjectTypeDefinition: (defs, def) =>
-    List.of(
-      ...validateMutationEntityFields(defs, def),
-    ),
-}
-
-const validateMutationTypeDefinition = (defs, def) =>
-  typeDefinitionValidators[def.kind] !== undefined
-    ? mutationTypeDefinitionValidators[def.kind](defs, def)
-    : List()
-
-const validateMutationTypeDefinitions = defs =>
-  defs.reduce((errors, def) => errors.concat(validateMutationTypeDefinition(defs, def)), List())
-
-
-const validateMutationSchema = filename => {
-  let doc = loadSchema(filename)
-  let schema = parseSchema(doc)
-  return validateMutationTypeDefinitions(schema.definitions)
-}
-
-
-
-
-
-
-module.exports = { typeSuggestion, validateSchema, validateMutationSchema }
+module.exports = { typeSuggestion, validateSchema }

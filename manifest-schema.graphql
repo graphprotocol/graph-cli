@@ -67,7 +67,7 @@ type EthereumContractEventHandler {
 type SubgraphManifest {
   specVersion: String!
   schema: Schema!
-  mutations: Manifest
+  mutations: Mutations
   description: String
   repository: String
   dataSources: [DataSource!]!
@@ -86,6 +86,7 @@ type EthereumContractSourceTemplate {
   abi: String!
 }
 
+union Mutations = Manifest | MutationsManifest
 union Resolvers = JavascriptResolvers
 
 type JavascriptResolvers {
@@ -96,10 +97,6 @@ type JavascriptResolvers {
 type MutationsManifest {
   specVersion: String!
   repository: String
-  mutations: Mutations!
-}
-
-type Mutations {
   schema: Schema!
-  resolvers: Resolvers
+  resolvers: Resolvers!
 }

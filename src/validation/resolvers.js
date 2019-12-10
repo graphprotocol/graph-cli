@@ -6,7 +6,7 @@ const fs = require('fs')
 const List = immutable.List
 const Map = immutable.Map
 
-module.exports.validateMutationResolvers = (filepath)=>{
+module.exports.validateMutationResolvers = (filepath, { resolveFile }) => {
     // TODO: this validation function needs to be implemented
     return List()
 }
