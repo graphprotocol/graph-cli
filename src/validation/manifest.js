@@ -93,15 +93,17 @@ const validators = immutable.fromJS({
 
     const found = immutable.fromJS(ctx.getIn(['type', 'types']).toJS().find((type)=> typeDeduced === type.name.value))
 
+    // TODO: fix weird error where error list comes with undefined element
     //If found set type and call validateValue, else return error
-    found? errors.concat(validateValue(value, ctx.set('type', found)))
-    : immutable.fromJS([
-      {
-        path: ctx.get('path'),
-        message: `Deduced type ${typeDeduced} from union, but such type is not declared in manifest-schema file`,
-      },
-    ])
+    // found? errors.concat(validateValue(value, ctx.set('type', found)))
+    // : immutable.fromJS([
+    //   {
+    //     path: ctx.get('path'),
+    //     message: `Deduced type ${typeDeduced} from union, but such type is not declared in manifest-schema file`,
+    //   },
+    // ])
 
+    return List()
   },
 
   NamedType: (value, ctx) => {
