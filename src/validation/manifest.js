@@ -52,51 +52,67 @@ const validators = immutable.fromJS({
     validators.get(ctx.getIn(['type', 'name', 'value']))(value, ctx),
 
   UnionTypeDefinition: (value, ctx) => {
-    console.log("HERERERER")
-    console.log(JSON.stringify(value, null, 2))
-    console.log(ctx.get('path'))
+    const errors = List();
     const typeDeducers = {
       "mutations": (value) => {
-        if (value.file) {
-
+        if (value.get('file')) {
+          return "Manifest";
         } else {
-
+          return "MutationsManifest";
         }
       },
       "mutations.resolvers": (value) => {
-        if (value.kind === "javascript") {
-
-        } else {
-
+        if (value.get('kind') === "javascript") {
+          return "JavascriptResolvers"
         }
       },
       "dataSources[$0]": (value) => {
-        if (value.kind === "") {
-
-        } else {
-
+        if (value.get('kind') === "ethereum/contract") {
+          return "EthereumContractDataSource"
         }
       }
     }
 
-    // 1. for the path ctx.get(path)
-    // 2. reduce what type it should be
-    // 3. verify type is in ctx.type.types
-    // 4. set type & call validateValue
+    // Concat path for type deduction
+    const path = ctx.get('path').toJS().reduce((prev, current, index) => {
+      if(index === 0){
+        return current;
+      }else if(typeof current === 'number'){
+        return `${prev}[$${current}]`
+      }else{
+        return `${prev}.${current}`
+      }
+    }, '');
 
-    /*ctx
-      .getIn(['type', 'types'])
-      .reduce(
-        (errors, type) => errors.concat(validateValue(value, ctx.set('type', type))),
-        List(),
-      )*/
+    //Deduce type
+
+    const typeDeduced = typeDeducers[path](value);
+
+
+    //Verify type is present in ctx.type.types
+
+    const found = immutable.fromJS(ctx.getIn(['type', 'types']).toJS().find((type)=> typeDeduced === type.name.value))
+
+    //If found set type and call validateValue, else return error
+    found? errors.concat(validateValue(value, ctx.set('type', found)))
+    : immutable.fromJS([
+      {
+        path: ctx.get('path'),
+        message: `Deduced type ${typeDeduced} from union, but such type is not declared in manifest-schema file`,
+      },
+    ])
+
   },
 
-  NamedType: (value, ctx) =>
-    validateValue(
+  NamedType: (value, ctx) => {
+    return validateValue(
       value,
-      ctx.update('type', type => resolveType(ctx.get('schema'), type)),
-    ),
+      ctx.update('type', type => {
+        return resolveType(ctx.get('schema'), type)
+      }),
+    )
+  }
+    ,
 
   NonNullType: (value, ctx) =>
     value !== null && value !== undefined
