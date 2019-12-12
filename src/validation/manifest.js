@@ -52,7 +52,6 @@ const validators = immutable.fromJS({
     validators.get(ctx.getIn(['type', 'name', 'value']))(value, ctx),
 
   UnionTypeDefinition: (value, ctx) => {
-    const errors = List();
     const typeDeducers = {
       "mutations": (value) => {
         if (value.get('file')) {
@@ -66,7 +65,7 @@ const validators = immutable.fromJS({
           return "JavascriptResolvers"
         }
       },
-      "dataSources[$0]": (value) => {
+      "dataSources[$]": (value) => {
         if (value.get('kind') === "ethereum/contract") {
           return "EthereumContractDataSource"
         }
@@ -78,32 +77,27 @@ const validators = immutable.fromJS({
       if(index === 0){
         return current;
       }else if(typeof current === 'number'){
-        return `${prev}[$${current}]`
+        return `${prev}[$]`
       }else{
         return `${prev}.${current}`
       }
     }, '');
 
     //Deduce type
-
     const typeDeduced = typeDeducers[path](value);
 
-
     //Verify type is present in ctx.type.types
-
-    const found = immutable.fromJS(ctx.getIn(['type', 'types']).toJS().find((type)=> typeDeduced === type.name.value))
+    const found = ctx.getIn(['type', 'types']).find((type)=> typeDeduced === type.name.value)
 
     // TODO: fix weird error where error list comes with undefined element
     //If found set type and call validateValue, else return error
-    found? errors.concat(validateValue(value, ctx.set('type', found)))
+    return found ? validateValue(value, ctx.set('type', found))
     : immutable.fromJS([
       {
         path: ctx.get('path'),
         message: `Deduced type ${typeDeduced} from union, but such type is not declared in manifest-schema file`,
       },
     ])
-
-    return List()
   },
 
   NamedType: (value, ctx) => {
