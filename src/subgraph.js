@@ -468,7 +468,19 @@ More than one template named '${name}', template names must be unique.`,
     if (data.mutations && data.mutations.file) { 
       const manifestFile = data.mutations.file
       const manifestDir = path.dirname(manifestFile)
-      const manifestData = yaml.parse(fs.readFileSync(manifestFile, 'utf-8'))
+      let manifestDataFile;
+      try {
+        fs.readFileSync(manifestFile, 'utf-8')
+      } catch (error) {
+        throwCombinedError(manifestFile, immutable.fromJS([
+          {
+            path: ["mutations > file"],
+            message: `Could not read file ${manifestFile}`,
+          }]
+        ))
+      }
+
+      const manifestData = yaml.parse(manifestDataFile)
 
       // Adjust all relative paths within mutation's manifest
       if (manifestData.schema && manifestData.schema.file) {
