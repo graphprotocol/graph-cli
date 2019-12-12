@@ -10,6 +10,14 @@ describe('Validation', () => {
     },
   )
   cliTest(
+    'Invalid subgraph manifest with datasources of kind ethereum contract',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-manifest-datasources-kind-ethereum-contract',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
     'ABI not found in data source',
     ['codegen', '--skip-migrations'],
     'validation/abi-not-found',
@@ -86,6 +94,12 @@ describe('Validation', () => {
     'Invalid data source template',
     ['codegen', '--skip-migrations'],
     'validation/invalid-data-source-template',
+    { exitCode: 1 },
+  )
+  cliTest(
+    'Invalid data source template of kind ethereum contract',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-data-source-template-kind-ethereum-contract',
     { exitCode: 1 },
   )
   cliTest(

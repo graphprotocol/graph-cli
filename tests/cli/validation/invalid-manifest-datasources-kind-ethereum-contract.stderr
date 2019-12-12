@@ -7,8 +7,21 @@
   Path: schema > file
   File does not exist: non-existent.grapqhl
 
+  Path: dataSources > 0 > name
+  Expected string, found number:
+  5
+
+  Path: dataSources > 0 > source
+  No value provided
+
+  Path: dataSources > 0 > mapping
+  Expected map, found list:
+  - 12
+  - 13
+  - 14
+
   Path: dataSources > 0
-  Field used for union type deduction has no value provided
+  Unexpected key in map: abis
 
   Path: templates
   Expected list, found map:
