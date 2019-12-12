@@ -52,48 +52,116 @@ const validators = immutable.fromJS({
     validators.get(ctx.getIn(['type', 'name', 'value']))(value, ctx),
 
   UnionTypeDefinition: (value, ctx) => {
-    const typeDeducers = {
-      "mutations": (value) => {
-        if (value.get('file')) {
-          return "Manifest";
-        } else {
-          return "MutationsManifest";
-        }
-      },
-      "mutations.resolvers": (value) => {
-        if (value.get('kind') === "javascript") {
-          return "JavascriptResolvers"
-        }
-      },
-      "dataSources[$]": (value) => {
-        if (value.get('kind') === "ethereum/contract") {
-          return "EthereumContractDataSource"
-        }
-      }
-    }
 
     // Concat path for type deduction
     const path = ctx.get('path').toJS().reduce((prev, current, index) => {
-      if(index === 0){
+      if (index === 0) {
         return current;
-      }else if(typeof current === 'number'){
+      } else if (typeof current === 'number') {
         return `${prev}[$]`
-      }else{
+      } else {
         return `${prev}.${current}`
       }
     }, '');
 
-    //Deduce type
+    // Deduce type
+
     let typeDeduced;
-    if(typeDeducers[path]){
-      typeDeduced = typeDeducers[path](value)
-    }else{
-      return immutable.fromJS([
-        {
-          path: ctx.get('path'),
-          message: `No type deducer found for this union type`,
-        },
-      ])
+
+    switch (path) {
+      case "mutations": {
+        if (value.get('file')) {
+          typeDeduced = "Manifest";
+        } else {
+          typeDeduced = "MutationsManifest";
+        }
+
+        break;
+      }
+
+      case "mutations.resolvers": {
+        if(!value.get('kind')){
+          return immutable.fromJS([
+            {
+              path: ctx.get('path'),
+              message: `Field used for union type deduction has no value provided`,
+            },
+          ])
+        }
+        else if (value.get('kind') === "javascript") {
+          typeDeduced = "JavascriptResolvers"
+        } else {
+          return immutable.fromJS([
+            {
+              path: ctx.get('path'),
+              message: `Mutations resolvers of kind 
+                ${value.get('kind')} have no type declared in 
+                manifest schema file`,
+            },
+          ])
+        }
+
+        break;
+      }
+
+      case "dataSources[$]": {
+        if(!value.get('kind')){
+          return immutable.fromJS([
+            {
+              path: ctx.get('path'),
+              message: `Field used for union type deduction has no value provided`,
+            },
+          ])
+        }
+        else if (value.get('kind') === "ethereum/contract") {
+          typeDeduced = "EthereumContractDataSource"
+        } else {
+          return immutable.fromJS([
+            {
+              path: ctx.get('path'),
+              message: `Datasources of kind 
+                ${value.get('kind')} have no type declared in 
+                manifest schema file`,
+            },
+          ])
+        }
+
+        break;
+      }
+
+      case "templates[$]": {
+        if(!value.get('kind')){
+          return immutable.fromJS([
+            {
+              path: ctx.get('path'),
+              message: `Field used for union type deduction has no value provided`,
+            },
+          ])
+        }
+        else if (value.get('kind') === "ethereum/contract") {
+          typeDeduced = "EthereumContractDataSourceTemplate"
+        } else {
+          return immutable.fromJS([
+            {
+              path: ctx.get('path'),
+              message: `Templates of kind 
+                ${value.get('kind')} have no type declared in 
+                manifest schema file`,
+            },
+          ])
+        }
+
+        break;
+      }
+
+      default: {
+        return immutable.fromJS([
+          {
+            path: ctx.get('path'),
+            message: `No type deducer found for this union type`,
+          },
+        ])
+      }
     }
 
     //Verify type is present in ctx.type.types
