@@ -10,6 +10,14 @@ describe('Validation', () => {
     },
   )
   cliTest(
+    'Invalid subgraph manifest with mutations',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-manifest-mutations',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
     'Invalid subgraph manifest with datasources of kind ethereum contract',
     ['codegen', '--skip-migrations'],
     'validation/invalid-manifest-datasources-kind-ethereum-contract',
