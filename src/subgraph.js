@@ -466,21 +466,16 @@ More than one template named '${name}', template names must be unique.`,
     // If a mutation manifest file reference is present,
     // embed the contents into the root subgraph manifest.
     if (data.mutations && data.mutations.file) { 
-      const manifestFile = data.mutations.file
-      const manifestDir = path.dirname(manifestFile)
-      let manifestDataFile;
-      try {
-        fs.readFileSync(manifestFile, 'utf-8')
-      } catch (error) {
-        throwCombinedError(manifestFile, immutable.fromJS([
-          {
-            path: ["mutations > file"],
-            message: `Could not read file ${manifestFile}`,
-          }]
-        ))
+      
+      //Validate manifest before the embedding of manifest.yaml
+      let manifestErrors = Subgraph.validate(data, { resolveFile })
+      if (manifestErrors.size > 0) {
+        throwCombinedError(filename, manifestErrors)
       }
 
-      const manifestData = yaml.parse(manifestDataFile)
+      const manifestFile = data.mutations.file
+      const manifestDir = path.dirname(manifestFile)
+      const manifestData = yaml.parse(fs.readFileSync(manifestFile, 'utf-8'))
 
       // Adjust all relative paths within mutation's manifest
       if (manifestData.schema && manifestData.schema.file) {
