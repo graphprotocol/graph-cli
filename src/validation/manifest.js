@@ -84,12 +84,21 @@ const validators = immutable.fromJS({
     }, '');
 
     //Deduce type
-    const typeDeduced = typeDeducers[path](value);
+    let typeDeduced;
+    if(typeDeducers[path]){
+      typeDeduced = typeDeducers[path](value)
+    }else{
+      return immutable.fromJS([
+        {
+          path: ctx.get('path'),
+          message: `No type deducer found for this union type`,
+        },
+      ])
+    }
 
     //Verify type is present in ctx.type.types
-    const found = ctx.getIn(['type', 'types']).find((type)=> typeDeduced === type.name.value)
+    const found = ctx.getIn(['type', 'types']).find((type)=> typeDeduced === type.getIn(['name', 'value']))
 
-    // TODO: fix weird error where error list comes with undefined element
     //If found set type and call validateValue, else return error
     return found ? validateValue(value, ctx.set('type', found))
     : immutable.fromJS([
