@@ -32,16 +32,16 @@ describe('Init', () => {
   beforeAll(removeSubgraphDirs)
   afterAll(removeSubgraphDirs)
 
-  cliTest(
-    'From example',
-    ['init', '--from-example', 'user/example-subgraph', subgraphDir1],
-    'init/from-example',
-    {
-      exitCode: 0,
-      timeout: 60000,
-      cwd: baseDir,
-    },
-  )
+  // cliTest(
+  //   'From example',
+  //   ['init', '--from-example', 'user/example-subgraph', subgraphDir1],
+  //   'init/from-example',
+  //   {
+  //     exitCode: 0,
+  //     timeout: 60000,
+  //     cwd: baseDir,
+  //   },
+  // )
 
   cliTest(
     'From contract',
