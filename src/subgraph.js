@@ -437,27 +437,32 @@ More than one template named '${name}', template names must be unique.`,
     // If a mutation manifest file reference is present,
     // embed the contents into the root subgraph manifest.
     if (data.mutations && data.mutations.file) { 
-      
-      //Validate manifest before the embedding of manifest.yaml
-      let manifestErrors = Subgraph.validate(data, { resolveFile })
-      if (manifestErrors.size > 0) {
-        throwCombinedError(filename, manifestErrors)
+
+      // Validate the data.mutations.file field before we operate with it
+      const mutationsManifest = data.mutations.file
+      if (!fs.existsSync(mutationsManifest)) {
+        throwCombinedError(filename, immutable.fromJS([
+          {
+            path: ['mutations', 'file'],
+            message: `File does not exist: ${path.relative(process.cwd(), mutationsManifest)}`,
+          },
+        ]))
       }
 
-      const manifestFile = data.mutations.file
-      const manifestDir = path.dirname(manifestFile)
-      const manifestData = yaml.parse(fs.readFileSync(manifestFile, 'utf-8'))
+      // Open and parse the mutation manifest file
+      const mutationsData = yaml.parse(fs.readFileSync(mutationsManifest, 'utf-8'))
 
       // Adjust all relative paths within mutation's manifest
-      if (manifestData.schema && manifestData.schema.file) {
-        manifestData.schema.file = `${manifestDir}/${manifestData.schema.file}`
+      const manifestDir = path.dirname(mutationsManifest)
+      if (mutationsData.schema && mutationsData.schema.file) {
+        mutationsData.schema.file = `${manifestDir}/${mutationsData.schema.file}`
       }
-      if (manifestData.resolvers && manifestData.resolvers.file) {
-        manifestData.resolvers.file = `${manifestDir}/${manifestData.resolvers.file}`
+      if (mutationsData.resolvers && mutationsData.resolvers.file) {
+        mutationsData.resolvers.file = `${manifestDir}/${mutationsData.resolvers.file}`
       }
 
       // Embed mutations manifest into root subgraph manifest
-      data.mutations = manifestData
+      data.mutations = mutationsData
     }
 
     let manifestErrors = Subgraph.validate(data, { resolveFile })

@@ -1,18 +1,5 @@
 - Load subgraph from subgraph.yaml
 ✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
 
-  Path: specVersion
-  No value provided
-
-  Path: schema > file
-  File does not exist: non-existent.grapqhl
-
   Path: mutations > file
   File does not exist: non-existent.yaml
-
-  Path: dataSources > 0 > kind
-  No value provided
-
-  Path: templates
-  Expected list, found map:
-  field: foo
