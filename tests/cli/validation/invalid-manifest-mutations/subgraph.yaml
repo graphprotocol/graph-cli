@@ -1,0 +1,14 @@
+schema:
+  file: ./non-existent.grapqhl
+mutations:
+  file: ./non-existent.yaml
+dataSources:
+  - name: 5
+    abis:
+      name: Foo
+    mapping:
+      - 12
+      - 13
+      - 14
+templates:
+  field: foo

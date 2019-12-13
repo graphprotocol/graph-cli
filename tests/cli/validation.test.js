@@ -10,9 +10,41 @@ describe('Validation', () => {
     },
   )
   cliTest(
+    'Invalid subgraph manifest with mutations',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-manifest-mutations',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
     'Invalid subgraph manifest with datasources of kind ethereum contract',
     ['codegen', '--skip-migrations'],
     'validation/invalid-manifest-datasources-kind-ethereum-contract',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations manifest',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-manifest',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations resolvers file',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-resolvers-file',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations resolvers kind',
+    ['codegen', '--skip-migrations'],
+    'validation/unsupported-mutations-resolvers-kind',
     {
       exitCode: 1,
     },

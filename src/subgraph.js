@@ -437,6 +437,13 @@ More than one template named '${name}', template names must be unique.`,
     // If a mutation manifest file reference is present,
     // embed the contents into the root subgraph manifest.
     if (data.mutations && data.mutations.file) { 
+      
+      //Validate manifest before the embedding of manifest.yaml
+      let manifestErrors = Subgraph.validate(data, { resolveFile })
+      if (manifestErrors.size > 0) {
+        throwCombinedError(filename, manifestErrors)
+      }
+
       const manifestFile = data.mutations.file
       const manifestDir = path.dirname(manifestFile)
       const manifestData = yaml.parse(fs.readFileSync(manifestFile, 'utf-8'))
