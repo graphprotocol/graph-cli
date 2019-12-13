@@ -145,15 +145,15 @@ const validators = immutable.fromJS({
       }
     }
 
-    //Verify type is present in ctx.type.types
+    // Verify type is present in ctx.type.types
     const found = ctx.getIn(['type', 'types']).find((type)=> unionType === type.getIn(['name', 'value']))
 
-    //If found set type and call validateValue, else return error
+    // If found set type and call validateValue, else return error
     return found ? validateValue(value, ctx.set('type', found))
     : immutable.fromJS([
       {
         path: ctx.get('path'),
-        message: `Deduced type ${unionType} from union, but such type is not declared in manifest-schema file`,
+        message: `Deduced type "${unionType}" from union, but such type is not declared.`,
       },
     ])
   },

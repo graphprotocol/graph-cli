@@ -36,5 +36,7 @@ module.exports.validateMutationResolvers = (filepath, { resolveFile }) => {
     //         ])
     // }
 
+    // TODO: ensure it's ES5 compatible
+
     return List()
 }

@@ -492,8 +492,6 @@ More than one template named '${name}', template names must be unique.`,
     let warnings = skipValidation
       ? immutable.List()
       : immutable.List.of(
-          // TODO: add validation of mutation's repository
-          // maybe change Subgraph.validateRepository -> validateRepositories
           ...Subgraph.validateRepository(manifest, { resolveFile }),
           ...Subgraph.validateDescription(manifest, { resolveFile }),
           ...Subgraph.validateEthereumContractHandlers(manifest),
