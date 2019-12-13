@@ -52,7 +52,6 @@ const validators = immutable.fromJS({
     validators.get(ctx.getIn(['type', 'name', 'value']))(value, ctx),
 
   UnionTypeDefinition: (value, ctx) => {
-
     // Concat path for type deduction
     const path = ctx.get('path').toJS().reduce((prev, current, index) => {
       if (index === 0) {
@@ -64,21 +63,18 @@ const validators = immutable.fromJS({
       }
     }, '');
 
-    // Deduce type
-
-    let typeDeduced;
+    // Deduce type of the union
+    let unionType;
 
     switch (path) {
       case "mutations": {
         if (value.get('file')) {
-          typeDeduced = "Manifest";
+          unionType = "Manifest";
         } else {
-          typeDeduced = "MutationsManifest";
+          unionType = "MutationsManifest";
         }
-
         break;
       }
-
       case "mutations.resolvers": {
         if(!value.get('kind')){
           return immutable.fromJS([
@@ -87,9 +83,8 @@ const validators = immutable.fromJS({
               message: `Field used for union type deduction has no value provided`,
             },
           ])
-        }
-        else if (value.get('kind') === "javascript") {
-          typeDeduced = "JavascriptResolvers"
+        } else if (value.get('kind') === "javascript") {
+          unionType = "JavascriptResolvers"
         } else {
           return immutable.fromJS([
             {
@@ -100,10 +95,8 @@ const validators = immutable.fromJS({
             },
           ])
         }
-
         break;
       }
-
       case "dataSources[$]": {
         if(!value.get('kind')){
           return immutable.fromJS([
@@ -112,9 +105,8 @@ const validators = immutable.fromJS({
               message: `Field used for union type deduction has no value provided`,
             },
           ])
-        }
-        else if (value.get('kind') === "ethereum/contract") {
-          typeDeduced = "EthereumContractDataSource"
+        } else if (value.get('kind') === "ethereum/contract") {
+          unionType = "EthereumContractDataSource"
         } else {
           return immutable.fromJS([
             {
@@ -125,10 +117,8 @@ const validators = immutable.fromJS({
             },
           ])
         }
-
         break;
       }
-
       case "templates[$]": {
         if(!value.get('kind')){
           return immutable.fromJS([
@@ -137,9 +127,8 @@ const validators = immutable.fromJS({
               message: `Field used for union type deduction has no value provided`,
             },
           ])
-        }
-        else if (value.get('kind') === "ethereum/contract") {
-          typeDeduced = "EthereumContractDataSourceTemplate"
+        } else if (value.get('kind') === "ethereum/contract") {
+          unionType = "EthereumContractDataSourceTemplate"
         } else {
           return immutable.fromJS([
             {
@@ -150,10 +139,8 @@ const validators = immutable.fromJS({
             },
           ])
         }
-
         break;
       }
-
       default: {
         return immutable.fromJS([
           {
@@ -165,27 +152,23 @@ const validators = immutable.fromJS({
     }
 
     //Verify type is present in ctx.type.types
-    const found = ctx.getIn(['type', 'types']).find((type)=> typeDeduced === type.getIn(['name', 'value']))
+    const found = ctx.getIn(['type', 'types']).find((type)=> unionType === type.getIn(['name', 'value']))
 
     //If found set type and call validateValue, else return error
     return found ? validateValue(value, ctx.set('type', found))
     : immutable.fromJS([
       {
         path: ctx.get('path'),
-        message: `Deduced type ${typeDeduced} from union, but such type is not declared in manifest-schema file`,
+        message: `Deduced type ${unionType} from union, but such type is not declared in manifest-schema file`,
       },
     ])
   },
 
-  NamedType: (value, ctx) => {
-    return validateValue(
+  NamedType: (value, ctx) =>
+    validateValue(
       value,
-      ctx.update('type', type => {
-        return resolveType(ctx.get('schema'), type)
-      }),
-    )
-  }
-    ,
+      ctx.update('type', type => resolveType(ctx.get('schema'), type)),
+    ),
 
   NonNullType: (value, ctx) =>
     value !== null && value !== undefined
@@ -299,7 +282,6 @@ const validators = immutable.fromJS({
 })
 
 const validateValue = (value, ctx) => {
-
   let kind = ctx.getIn(['type', 'kind'])
   let validator = validators.get(kind)
 
@@ -373,25 +355,25 @@ Recommendation: Make all data sources and templates use the same network name.`,
 }
 
 const validateManifest = (value, type, schema, { resolveFile }) => {
-  value
   // Validate manifest using the GraphQL schema that defines its structure
-  let errors = value !== null && value !== undefined
-    ? validateValue(
-        immutable.fromJS(value),
-        immutable.fromJS({
-          schema: schema,
-          type: type,
-          path: [],
-          errors: [],
-          resolveFile,
-        }),
-      )
-    : immutable.fromJS([
-        {
-          path: [],
-          message: `Expected non-empty value, found ${typeName(value)}:\n  ${value}`,
-        },
-      ])
+  let errors =
+    value !== null && value !== undefined
+      ? validateValue(
+          immutable.fromJS(value),
+          immutable.fromJS({
+            schema: schema,
+            type: type,
+            path: [],
+            errors: [],
+            resolveFile,
+          }),
+        )
+      : immutable.fromJS([
+          {
+            path: [],
+            message: `Expected non-empty value, found ${typeName(value)}:\n  ${value}`,
+          },
+        ])
 
   // Fail early because a broken manifest prevents us from performing
   // additional validation steps

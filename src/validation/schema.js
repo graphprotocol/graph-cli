@@ -49,6 +49,7 @@ const typeSuggestion = typeName =>
 
 const loadSchema = filenames => {
   try {
+    // Concatenate multiple schema files together
     let result = ""
     for (filename of filenames) {
       result += fs.readFileSync(filename, 'utf-8')
@@ -71,12 +72,12 @@ const validateEntityDirective = def =>
   def.directives.find(directive => directive.name.value === 'entity')
     ? List()
     : immutable.fromJS([
-      {
-        loc: def.loc,
-        entity: def.name.value,
-        message: `Defined without @entity directive`,
-      },
-    ])
+        {
+          loc: def.loc,
+          entity: def.name.value,
+          message: `Defined without @entity directive`,
+        },
+      ])
 
 const validateEntityID = def => {
   let idField = def.fields.find(field => field.name.value === 'id')
@@ -110,22 +111,22 @@ const validateEntityID = def => {
 
 const validateListFieldType = (def, field) =>
   field.type.kind === 'NonNullType' &&
-    field.type.kind === 'ListType' &&
-    field.type.type.kind !== 'NonNullType'
+  field.type.kind === 'ListType' &&
+  field.type.type.kind !== 'NonNullType'
     ? immutable.fromJS([
-      {
-        loc: field.loc,
-        entity: def.name.value,
-        message: `\
+        {
+          loc: field.loc,
+          entity: def.name.value,
+          message: `\
 Field '${field.name.value}':
 Field has type [${field.type.type.name.value}]! but
 must have type [${field.type.type.name.value}!]!
 
 Reason: Lists with null elements are not supported.`,
-      },
-    ])
+        },
+      ])
     : field.type.kind === 'ListType' && field.type.type.kind !== 'NonNullType'
-      ? immutable.fromJS([
+    ? immutable.fromJS([
         {
           loc: field.loc,
           entity: def.name.value,
@@ -137,7 +138,7 @@ must have type [${field.type.type.name.value}!]
 Reason: Lists with null elements are not supported.`,
         },
       ])
-      : List()
+    : List()
 
 const unwrapType = type => {
   let innerTypeFromList = listType =>
@@ -154,8 +155,8 @@ const unwrapType = type => {
   return type.kind === 'NonNullType'
     ? innerTypeFromNonNull(type)
     : type.kind === 'ListType'
-      ? innerTypeFromList(type)
-      : type
+    ? innerTypeFromList(type)
+    : type
 }
 
 const entityTypeByName = (defs, name) =>
@@ -198,16 +199,16 @@ const validateInnerFieldType = (defs, def, field) => {
   return availableTypes.includes(typeName)
     ? List()
     : immutable.fromJS([
-      {
-        loc: field.loc,
-        entity: def.name.value,
-        message: `\
+        {
+          loc: field.loc,
+          entity: def.name.value,
+          message: `\
 Field '${field.name.value}': \
 Unknown type '${typeName}'.${
-          suggestion !== undefined ? ` Did you mean '${suggestion}'?` : ''
+            suggestion !== undefined ? ` Did you mean '${suggestion}'?` : ''
           }`,
-      },
-    ])
+        },
+      ])
 }
 
 const validateEntityFieldType = (defs, def, field) =>
@@ -219,14 +220,14 @@ const validateEntityFieldType = (defs, def, field) =>
 const validateEntityFieldArguments = (defs, def, field) =>
   field.arguments.length > 0
     ? immutable.fromJS([
-      {
-        loc: field.loc,
-        entity: def.name.value,
-        message: `\
+        {
+          loc: field.loc,
+          entity: def.name.value,
+          message: `\
 Field '${field.name.value}': \
 Field arguments are not supported.`,
-      },
-    ])
+        },
+      ])
     : List()
 
 const entityFieldExists = (entityDef, name) =>

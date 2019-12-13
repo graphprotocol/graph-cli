@@ -19,7 +19,7 @@ class Compiler {
     this.ipfs = options.ipfs
     this.sourceDir = path.dirname(options.subgraphManifest)
 
-    process.on('uncaughtException', function (e) {
+    process.on('uncaughtException', function(e) {
       toolbox.print.error(`UNCAUGHT EXCEPTION: ${e}`)
     })
   }
@@ -191,22 +191,20 @@ class Compiler {
           ),
         )
 
-        subgraph = subgraph.update('templates', templates => {
-          return templates === undefined
+        subgraph = subgraph.update('templates', templates =>
+          templates === undefined
             ? templates
             : templates.map(template =>
-              template.updateIn(['mapping', 'file'], mappingPath =>
-                this._compileTemplateMapping(
-                  template,
-                  mappingPath,
-                  compiledFiles,
-                  spinner,
+                template.updateIn(['mapping', 'file'], mappingPath =>
+                  this._compileTemplateMapping(
+                    template,
+                    mappingPath,
+                    compiledFiles,
+                    spinner,
+                  ),
                 ),
-              ),
-            )
-        })
-
-        //are manifest files meant to be kept separate in the end?
+              )
+        )
 
         return subgraph
       },
@@ -396,7 +394,7 @@ class Compiler {
   async writeSubgraphToOutputDirectory(subgraph) {
     const displayDir = `${this.displayPath(this.options.outputDir)}${
       toolbox.filesystem.separator
-      }`
+    }`
 
     return await withSpinner(
       `Write compiled subgraph to ${displayDir}`,
@@ -453,32 +451,32 @@ class Compiler {
           return templates === undefined
             ? templates
             : templates.map(template =>
-              template
-                // Write template ABIs to the output directory
-                .updateIn(['mapping', 'abis'], abis =>
-                  abis.map(abi =>
-                    abi.update('file', abiFile => {
-                      abiFile = path.resolve(this.sourceDir, abiFile)
-                      let abiData = ABI.load(abi.get('name'), abiFile)
-                      return path.relative(
-                        this.options.outputDir,
-                        this._writeSubgraphFile(
-                          abiFile,
-                          JSON.stringify(abiData.data.toJS(), null, 2),
-                          this.sourceDir,
-                          this.subgraphDir(this.options.outputDir, template),
-                          spinner,
-                        ),
-                      )
-                    }),
-                  ),
-                )
+                template
+                  // Write template ABIs to the output directory
+                  .updateIn(['mapping', 'abis'], abis =>
+                    abis.map(abi =>
+                      abi.update('file', abiFile => {
+                        abiFile = path.resolve(this.sourceDir, abiFile)
+                        let abiData = ABI.load(abi.get('name'), abiFile)
+                        return path.relative(
+                          this.options.outputDir,
+                          this._writeSubgraphFile(
+                            abiFile,
+                            JSON.stringify(abiData.data.toJS(), null, 2),
+                            this.sourceDir,
+                            this.subgraphDir(this.options.outputDir, template),
+                            spinner,
+                          ),
+                        )
+                      }),
+                    ),
+                  )
 
-                // The mapping file is already being written to the output
-                // directory by the AssemblyScript compiler
-                .updateIn(['mapping', 'file'], mappingFile =>
-                  path.relative(this.options.outputDir, mappingFile),
-                ),
+                  // The mapping file is already being written to the output
+                  // directory by the AssemblyScript compiler
+                  .updateIn(['mapping', 'file'], mappingFile =>
+                    path.relative(this.options.outputDir, mappingFile),
+                  ),
             )
         })
 
@@ -563,11 +561,12 @@ class Compiler {
           })
         }
 
-        //Upload mutations schema and resolvers if present
+        // Upload mutations schema and resolvers if present
         if(subgraph.get('mutations')){
-          const filePaths = [];
-          files.push(['mutations', 'schema', 'file']);
-          files.push(['mutations', 'resolvers','file']);
+          const filePaths = [
+            ['mutations', 'schema', 'file'],
+            ['mutations', 'resolvers','file']
+          ];
 
           for (const path of filePaths) {
             updates.push({
