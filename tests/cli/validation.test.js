@@ -34,6 +34,14 @@ describe('Validation', () => {
     },
   )
   cliTest(
+    'Invalid mutations resolver file',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-resolvers-file',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
     'ABI not found in data source',
     ['codegen', '--skip-migrations'],
     'validation/abi-not-found',
