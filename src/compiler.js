@@ -203,7 +203,7 @@ class Compiler {
                     spinner,
                   ),
                 ),
-              )
+              ),
         )
 
         return subgraph
@@ -477,7 +477,7 @@ class Compiler {
                   .updateIn(['mapping', 'file'], mappingFile =>
                     path.relative(this.options.outputDir, mappingFile),
                   ),
-            )
+              )
         })
 
         // Write the subgraph manifest itself

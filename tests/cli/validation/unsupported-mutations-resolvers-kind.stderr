@@ -2,6 +2,4 @@
 ✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
 
   Path: mutations > resolvers
-  Mutations resolvers of kind 
-                  unsupportedscript have no type declared in 
-                  manifest schema file
+  Mutation resolvers of kind "UnsupportedLanguage" are not supported

@@ -79,8 +79,8 @@ const validators = immutable.fromJS({
         if(!value.get('kind')){
           return immutable.fromJS([
             {
-              path: ctx.get('path'),
-              message: `Field used for union type deduction has no value provided`,
+              path: [...ctx.get('path'), 'kind'],
+              message: `No value provided`,
             },
           ])
         } else if (value.get('kind') === "javascript") {
@@ -89,9 +89,7 @@ const validators = immutable.fromJS({
           return immutable.fromJS([
             {
               path: ctx.get('path'),
-              message: `Mutations resolvers of kind 
-                ${value.get('kind')} have no type declared in 
-                manifest schema file`,
+              message: `Mutation resolvers of kind "${value.get('kind')}" are not supported`,
             },
           ])
         }
@@ -101,8 +99,8 @@ const validators = immutable.fromJS({
         if(!value.get('kind')){
           return immutable.fromJS([
             {
-              path: ctx.get('path'),
-              message: `Field used for union type deduction has no value provided`,
+              path: [...ctx.get('path'), 'kind'],
+              message: `No value provided`,
             },
           ])
         } else if (value.get('kind') === "ethereum/contract") {
@@ -111,9 +109,7 @@ const validators = immutable.fromJS({
           return immutable.fromJS([
             {
               path: ctx.get('path'),
-              message: `Datasources of kind 
-                ${value.get('kind')} have no type declared in 
-                manifest schema file`,
+              message: `Datasources of kind "${value.get('kind')}" are not supported`,
             },
           ])
         }
@@ -123,8 +119,8 @@ const validators = immutable.fromJS({
         if(!value.get('kind')){
           return immutable.fromJS([
             {
-              path: ctx.get('path'),
-              message: `Field used for union type deduction has no value provided`,
+              path: [...ctx.get('path'), 'kind'],
+              message: `No value provided`,
             },
           ])
         } else if (value.get('kind') === "ethereum/contract") {
@@ -133,9 +129,7 @@ const validators = immutable.fromJS({
           return immutable.fromJS([
             {
               path: ctx.get('path'),
-              message: `Templates of kind 
-                ${value.get('kind')} have no type declared in 
-                manifest schema file`,
+              message: `Templates of kind "${value.get('kind')}" are not supported`,
             },
           ])
         }
@@ -304,24 +298,6 @@ const validateValue = (value, ctx) => {
   }
 }
 
-const validateMutationResolverKind = value => {
-  let supportedKinds = ['javascript']
-
-  if (value.mutations && value.mutations.resolvers) {
-    if (supportedKinds.indexOf(value.mutations.resolvers.kind) === -1) {
-      return immutable.fromJS([
-        {
-          path: [],
-          message: `Requested resolver kind ${value.mutations.resolvers.kind} is not supported. `
-          + `Please use one of the following supported kind's: ${supportedKinds}`
-        }
-      ])
-    }
-  }
-
-  return List()
-}
-
 const validateDataSourceNetworks = value => {
   let networks = [...value.dataSources, ...(value.templates || [])]
     .filter(dataSource => dataSource.kind === 'ethereum/contract')
@@ -383,14 +359,7 @@ const validateManifest = (value, type, schema, { resolveFile }) => {
 
   // Validate that all data sources are for the same `network` (this includes
   // _no_ network at all)
-  errors = validateDataSourceNetworks(value)
-
-  if (!errors.isEmpty()) {
-    return errors
-  }
-
-  // Validate that we support the mutation resolver kind they're requesting
-  return validateMutationResolverKind(value)
+  return validateDataSourceNetworks(value)
 }
 
 module.exports = { validateManifest }

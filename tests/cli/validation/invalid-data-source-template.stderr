@@ -4,5 +4,5 @@
   Path: dataSources > 0 > mapping > abis > 0 > file
   File does not exist: Abi.json
 
-  Path: templates > 0
-  Field used for union type deduction has no value provided
+  Path: templates > 0 > kind
+  No value provided

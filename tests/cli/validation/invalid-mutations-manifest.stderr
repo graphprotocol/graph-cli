@@ -7,5 +7,5 @@
   Path: mutations > schema > file
   File does not exist: mutations/nonexistent.graphql
 
-  Path: mutations > resolvers
-  Field used for union type deduction has no value provided
+  Path: mutations > resolvers > kind
+  No value provided

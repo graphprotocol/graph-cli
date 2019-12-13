@@ -10,8 +10,8 @@
   Path: mutations > file
   File does not exist: non-existent.yaml
 
-  Path: dataSources > 0
-  Field used for union type deduction has no value provided
+  Path: dataSources > 0 > kind
+  No value provided
 
   Path: templates
   Expected list, found map:
