@@ -1,0 +1,11 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
+
+  Path: mutations > specVersion
+  No value provided
+
+  Path: mutations > schema > file
+  File does not exist: mutations/nonexistent.graphql
+
+  Path: mutations > resolvers
+  Field used for union type deduction has no value provided
