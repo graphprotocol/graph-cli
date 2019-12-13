@@ -34,9 +34,17 @@ describe('Validation', () => {
     },
   )
   cliTest(
-    'Invalid mutations resolver file',
+    'Invalid mutations resolvers file',
     ['codegen', '--skip-migrations'],
     'validation/invalid-mutations-resolvers-file',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations resolvers kind',
+    ['codegen', '--skip-migrations'],
+    'validation/unsupported-mutations-resolvers-kind',
     {
       exitCode: 1,
     },
