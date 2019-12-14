@@ -88,7 +88,7 @@ const validators = immutable.fromJS({
         } else {
           return immutable.fromJS([
             {
-              path: ctx.get('path'),
+              path: [...ctx.get('path'), 'kind'],
               message: `Mutation resolvers of kind "${value.get('kind')}" are not supported`,
             },
           ])
@@ -108,7 +108,7 @@ const validators = immutable.fromJS({
         } else {
           return immutable.fromJS([
             {
-              path: ctx.get('path'),
+              path: [...ctx.get('path'), 'kind'],
               message: `Datasources of kind "${value.get('kind')}" are not supported`,
             },
           ])
@@ -128,7 +128,7 @@ const validators = immutable.fromJS({
         } else {
           return immutable.fromJS([
             {
-              path: ctx.get('path'),
+              path: [...ctx.get('path'), 'kind'],
               message: `Templates of kind "${value.get('kind')}" are not supported`,
             },
           ])
@@ -139,7 +139,7 @@ const validators = immutable.fromJS({
         return immutable.fromJS([
           {
             path: ctx.get('path'),
-            message: `No type deducer found for this union type`,
+            message: `Please contact the developers. Deducer for "${path}" has not been implemented.`,
           },
         ])
       }
@@ -153,7 +153,7 @@ const validators = immutable.fromJS({
     : immutable.fromJS([
       {
         path: ctx.get('path'),
-        message: `Deduced type "${unionType}" from union, but such type is not declared.`,
+        message: `Please contact the developers. "${unionType}" has been deduced, but this type is not defined.`,
       },
     ])
   },

@@ -2,4 +2,4 @@
 ✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
 
   Path: templates > 0 > kind
-  No value provided
+  Templates of kind "not/supported" are not supported

@@ -10,9 +10,9 @@ describe('Validation', () => {
     },
   )
   cliTest(
-    'Invalid subgraph manifest with mutations',
+    'Invalid subgraph manifest datasources kind',
     ['codegen', '--skip-migrations'],
-    'validation/invalid-manifest-mutations',
+    'validation/invalid-manifest-datasources-kind',
     {
       exitCode: 1,
     },
@@ -26,9 +26,33 @@ describe('Validation', () => {
     },
   )
   cliTest(
+    'Invalid mutations manifest file',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-manifest-file',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations manifest yaml',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-manifest-yaml',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
     'Invalid mutations manifest',
     ['codegen', '--skip-migrations'],
     'validation/invalid-mutations-manifest',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid embedded mutations manifest',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-embedded-mutations-manifest',
     {
       exitCode: 1,
     },
@@ -133,6 +157,14 @@ describe('Validation', () => {
     ['codegen', '--skip-migrations'],
     'validation/invalid-data-source-template-kind-ethereum-contract',
     { exitCode: 1 },
+  )
+  cliTest(
+    'Invalid data source template kind',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-data-source-template-kind',
+    {
+      exitCode: 1,
+    },
   )
   cliTest(
     'BigDecimal is a valid type',

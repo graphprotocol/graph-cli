@@ -450,19 +450,28 @@ More than one template named '${name}', template names must be unique.`,
       }
 
       // Open and parse the mutation manifest file
-      const mutationsData = yaml.parse(fs.readFileSync(mutationsManifest, 'utf-8'))
+      try {
+        const mutationsData = yaml.parse(fs.readFileSync(mutationsManifest, 'utf-8'))
 
-      // Adjust all relative paths within mutation's manifest
-      const manifestDir = path.dirname(mutationsManifest)
-      if (mutationsData.schema && mutationsData.schema.file) {
-        mutationsData.schema.file = `${manifestDir}/${mutationsData.schema.file}`
-      }
-      if (mutationsData.resolvers && mutationsData.resolvers.file) {
-        mutationsData.resolvers.file = `${manifestDir}/${mutationsData.resolvers.file}`
-      }
+        // Adjust all relative paths within mutation's manifest
+        const manifestDir = path.dirname(mutationsManifest)
+        if (mutationsData.schema && mutationsData.schema.file) {
+          mutationsData.schema.file = `${manifestDir}/${mutationsData.schema.file}`
+        }
+        if (mutationsData.resolvers && mutationsData.resolvers.file) {
+          mutationsData.resolvers.file = `${manifestDir}/${mutationsData.resolvers.file}`
+        }
 
-      // Embed mutations manifest into root subgraph manifest
-      data.mutations = mutationsData
+        // Embed mutations manifest into root subgraph manifest
+        data.mutations = mutationsData
+      } catch (e) {
+        throwCombinedError(mutationsManifest, immutable.fromJS([
+          {
+            path: ['mutations', 'file'],
+            message: e.message,
+          },
+        ]))
+      }
     }
 
     let manifestErrors = Subgraph.validate(data, { resolveFile })

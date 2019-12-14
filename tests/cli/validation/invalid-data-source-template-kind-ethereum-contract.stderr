@@ -1,9 +1,6 @@
 - Load subgraph from subgraph.yaml
 ✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
 
-  Path: dataSources > 0 > mapping > abis > 0 > file
-  File does not exist: Abi.json
-
   Path: templates > 0 > name
   Expected string, found number:
   5

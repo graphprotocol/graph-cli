@@ -1,0 +1,15 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
+
+  Path: specVersion
+  No value provided
+
+  Path: schema > file
+  File does not exist: non-existent.grapqhl
+
+  Path: dataSources > 0 > kind
+  Datasources of kind "not/supported" are not supported
+
+  Path: templates
+  Expected list, found map:
+  field: foo
