@@ -1,0 +1,5 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Error in schema.graphql:
+
+  Result:
+  - Field 'values': Unknown type 'InvalidType'.

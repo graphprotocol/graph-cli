@@ -1,0 +1,34 @@
+- Load subgraph from subgraph.yaml
+⚠ Warnings while loading subgraph from subgraph.yaml: Warnings in subgraph.yaml:
+  
+    Path: repository
+    The repository is still set to https://github.com/graphprotocol/example-subgraph.
+    Please replace it with a link to your subgraph source code.
+  
+    Path: description
+    The description is still the one from the example subgraph.
+    Please update it to tell users more about your subgraph.
+
+✔ Load subgraph from subgraph.yaml
+- Load contract ABIs
+  Load contract ABI from Abi.json
+- Load contract ABIs
+✔ Load contract ABIs
+- Generate types for contract ABIs
+  Generate types for contract ABI: ExampleContract (Abi.json)
+- Generate types for contract ABIs
+  Write types to generated/ExampleSubgraph/ExampleContract.ts
+- Generate types for contract ABIs
+✔ Generate types for contract ABIs
+- Generate types for data source templates
+✔ Generate types for data source templates
+- Load data source template ABIs
+✔ Load data source template ABIs
+- Generate types for data source template ABIs
+✔ Generate types for data source template ABIs
+- Load GraphQL schema from schema.graphql
+✔ Load GraphQL schema from schema.graphql
+- Generate types for GraphQL schema
+  Write types to generated/schema.ts
+- Generate types for GraphQL schema
+✔ Generate types for GraphQL schema

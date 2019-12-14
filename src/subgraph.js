@@ -56,12 +56,12 @@ module.exports = class Subgraph {
 
   static validateSchema(manifest, { resolveFile }) {
     let filename = resolveFile(manifest.getIn(['schema', 'file']))
-    let errors = validation.validateSchema([filename])
+    let errors = validation.validateSchema(filename)
 
     // If mutations are being used, validate the mutation schema
-    if (errors.size === 0 && manifest.getIn('mutations')) {
+    if (manifest.get('mutations')) {
       const mutationSchemaFilename = manifest.getIn(['mutations', 'schema', 'file'])
-      errors = validation.validateSchema([filename, mutationSchemaFilename], true)
+      errors = validation.validateSchema(filename, mutationSchemaFilename)
     }
 
     if (errors.size > 0) {
@@ -495,7 +495,7 @@ More than one template named '${name}', template names must be unique.`,
           ...Subgraph.validateCallFunctions(manifest, { resolveFile }),
           ...Subgraph.validateUniqueDataSourceNames(manifest),
           ...Subgraph.validateUniqueTemplateNames(manifest),
-          ...Subgraph.validateMutationResolvers(manifest, { resolveFile }),
+          //...Subgraph.validateMutationResolvers(manifest, { resolveFile }),
         )
 
     if (errors.size > 0) {

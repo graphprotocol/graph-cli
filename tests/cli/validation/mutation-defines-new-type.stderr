@@ -1,0 +1,5 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Error in schema.graphql:
+
+  NewType:
+  - ObjectTypeDefinition 'NewType' found, Mutation must be the only type. Try using 'input' for mutation arguments, 'interface' for mutation return values, or existing @entity types from the subgraph schema.

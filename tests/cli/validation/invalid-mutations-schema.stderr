@@ -1,0 +1,8 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Invalid GraphQL schema: Syntax Error: Expected :, found }
+
+GraphQL request:3:1
+2 |   invalid
+3 | }
+  | ^
+4 |
