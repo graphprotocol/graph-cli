@@ -3,6 +3,7 @@
   "version": "0.16.2",
   "description": "CLI for building for and deploying to The Graph",
   "dependencies": {
+    "acorn": "^7.1.0",
     "assemblyscript": "https://github.com/AssemblyScript/assemblyscript#36040d5b5312f19a025782b5e36663823494c2f3",
     "chalk": "^2.4.1",
     "chokidar": "^3.0.2",

@@ -6,7 +6,7 @@ module.exports = {
       updateGravatarImage: function () { },
     },
   },
-  config: {
+  notConfig: {
 
   }
 }

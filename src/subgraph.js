@@ -119,11 +119,21 @@ module.exports = class Subgraph {
 
   static validateMutationResolvers(manifest, { resolveFile }) {
     if (manifest.get('mutations')) {
-      const filename = manifest.getIn(['mutations', 'resolvers', 'file'])
-      return validation.validateMutationResolvers(filename, { resolveFile })
-    } else {
-      return immutable.List()
+      const resolversFile = manifest.getIn(['mutations', 'resolvers', 'file'])
+      const schemaFile = manifest.getIn(['mutations', 'schema', 'file'])
+      const errorMsg = validation.validateMutationResolvers(resolversFile, schemaFile, { resolveFile })
+
+      if (errorMsg) {
+        return immutable.fromJS([
+          {
+            path: ['mutations', 'resolvers', 'file'],
+            message: errorMsg
+          }
+        ])
+      }
     }
+
+    return immutable.List()
   }
 
   static validateDataSourceAbis(dataSource, { resolveFile, path }) {
@@ -495,7 +505,7 @@ More than one template named '${name}', template names must be unique.`,
           ...Subgraph.validateCallFunctions(manifest, { resolveFile }),
           ...Subgraph.validateUniqueDataSourceNames(manifest),
           ...Subgraph.validateUniqueTemplateNames(manifest),
-          //...Subgraph.validateMutationResolvers(manifest, { resolveFile }),
+          ...Subgraph.validateMutationResolvers(manifest, { resolveFile }),
         )
 
     if (errors.size > 0) {

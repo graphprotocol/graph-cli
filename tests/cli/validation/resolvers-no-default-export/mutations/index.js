@@ -1,4 +1,4 @@
-module.exports = {
+const noExport = {
   resolvers: {
     Mutation: {
       createGravatar: function () { },

@@ -1,42 +1,79 @@
-const immutable = require('immutable')
+const fs = require('fs')
+const graphql = require('graphql/language')
+const acorn = require('acorn')
 
-const List = immutable.List
+module.exports.validateMutationResolvers = (resolversFile, schemaFile, { resolveFile }) => {
+  const resolversModule = require(resolveFile(resolversFile));
 
-module.exports.validateMutationResolvers = (filepath, { resolveFile }) => {
-    const resolversModule = require(resolveFile(filepath)).default;
+  // If the module has no default export
+  if (!resolversModule) { 
+    return 'No default export found'
+  }
 
-    // Validate default exports an object with properties resolvers and config
-    if (!resolversModule.hasOwnProperty('resolvers') || !resolversModule.hasOwnProperty('config'))
-        return immutable.fromJS([
-            {
-                path: ["Resolvers package"],
-                message: `Resolvers's default exports must be an object with properties resolvers and config`,
-            },
-        ])
+  // Validate default exports an object with properties resolvers and config
+  if (!resolversModule.resolvers) {
+    return "'resolvers' object not found in the default export"
+  }
+  if (!resolversModule.config) {
+    return "'config' object not found in the default export"
+  }
 
-    // Validate resolvers has property Mutations which includes all of the schema's mutations.
-    if (!resolversModule.resolvers.hasOwnProperty("Mutations"))
-        return immutable.fromJS([
-            {
-                path: ["Resolvers package"],
-                message: `Resolvers's resolvers property must have property Mutations which includes all of the schema's mutations`,
-            },
-        ])
+  // Validate resolvers has property Mutations which includes all of the schema's mutations.
+  if (!resolversModule.resolvers.Mutation) {
+    return "'Mutation' object not found in the resolvers object"
+  }
 
-    //TODO: what about custom properties? they are objects at leaf level, not functions
-    // Validate config's leaf properties are all functions
-    // for (let leafProp of Object.keys(resolversModule.config)) {
-    //     console.log(resolversModule.config[leafProp])
-    //     if (typeof resolversModule.config[leafProp] !== "function")
-    //         return immutable.fromJS([
-    //             {
-    //                 path: ["Resolvers package"],
-    //                 message: `Resolvers's config property can only have function properties`,
-    //             },
-    //         ])
-    // }
+  // Validate each config "leaf" property has a function that takes one argument
+  const validateLeafProp = (name, leaf, root) => {
+    const props = Object.keys(leaf)
+    if (props.length > 0) {
+      for (const prop of props) {
+        const error = validateLeafProp(prop, leaf[prop])
+        if (error) {
+          return error
+        }
+      }
+      return undefined
+    }
 
-    // TODO: ensure it's ES5 compatible
+    // If this is the root object, return without validating
+    if (root) {
+      return undefined
+    }
 
-    return List()
+    if (typeof leaf !== "function") {
+      return `config property '${name}' must be a function`
+    }
+
+    if (leaf.length !== 1) {
+      return `config property '${name}' must take one argument`
+    }
+  }
+
+  const error = validateLeafProp('config', resolversModule.config, true)
+  if (error) {
+    return error
+  }
+
+  // Validate the resolver's shape matches the Mutation shape
+  const mutationsSchema = graphql.parse(fs.readFileSync(schemaFile, 'utf-8'))
+  const mutationDef = mutationsSchema.definitions.find(def => def.name.value === "Mutation")
+  const resolvers = resolversModule.resolvers.Mutation
+
+  for (const field of mutationDef.fields) {
+    if (!resolvers[field.name.value]) {
+      return `resolvers missing property ${field.name.value}`
+    }
+  }
+
+  // Validate the resolver's module is ES5 compliant
+  try {
+   acorn.parse(fs.readFileSync(resolversFile, 'utf-8'), {
+      ecmaVersion: '5', silent: true
+    })
+  } catch (e) {
+    return `resolvers module is not ES5 compliant. Error: ${e}`
+  }
+
+  return undefined
 }

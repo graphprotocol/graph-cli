@@ -146,6 +146,70 @@ describe('Validation', () => {
     },
   )
   cliTest(
+    'Resolvers no default export',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-no-default-export',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers no resolvers object',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-no-resolvers-object',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers no Mutation object',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-no-mutation-object',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers no config object',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-no-config-object',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers invalid config type',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-invalid-config-type',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers invalid config function',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-invalid-config-function',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers invalid resolvers',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-invalid-resolvers',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers not es5',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-not-es5',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
     'ABI not found in data source',
     ['codegen', '--skip-migrations'],
     'validation/abi-not-found',

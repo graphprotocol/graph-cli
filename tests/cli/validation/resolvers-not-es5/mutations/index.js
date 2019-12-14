@@ -1,7 +1,7 @@
 module.exports = {
   resolvers: {
     Mutation: {
-      createGravatar: function () { },
+      createGravatar: () => { },
       updateGravatarName: function () { },
       updateGravatarImage: function () { },
     },

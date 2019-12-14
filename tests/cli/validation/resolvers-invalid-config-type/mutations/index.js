@@ -7,6 +7,9 @@ module.exports = {
     },
   },
   config: {
-
+    prop1: function (value) { },
+    prop2: {
+      prop3: 5
+    }
   }
 }

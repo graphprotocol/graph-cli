@@ -3,7 +3,6 @@ module.exports = {
     Mutation: {
       createGravatar: function () { },
       updateGravatarName: function () { },
-      updateGravatarImage: function () { },
     },
   },
   config: {

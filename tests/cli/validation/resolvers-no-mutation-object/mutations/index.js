@@ -1,6 +1,6 @@
 module.exports = {
   resolvers: {
-    Mutation: {
+    notMutation: {
       createGravatar: function () { },
       updateGravatarName: function () { },
       updateGravatarImage: function () { },
