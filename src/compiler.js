@@ -104,6 +104,21 @@ class Compiler {
         })
       })
 
+      // Add mutation files
+      if (subgraph.has('mutations')) {
+        let mutations = subgraph.get('mutations')
+        files.push(mutations.getIn(['schema', 'file']))
+
+        let resolversKind = mutations.getIn(['resolvers', 'kind'])
+        switch (resolversKind) {
+          case "javascript":
+            files.push(mutations.getIn(['resolvers', 'file']))
+            break;
+          default:
+            throw Error(`Unimplemented resolvers kind '${resolversKind}'`)
+        }
+      }
+
       // Make paths absolute
       return files.map(file => path.resolve(file))
     } catch (e) {
