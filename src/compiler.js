@@ -495,6 +495,64 @@ class Compiler {
               )
         })
 
+        if (subgraph.has('mutations')) {
+          // Copy mutation files and update their paths
+          subgraph = subgraph.update('mutations', mutations =>
+            // mutations/schema.graphql + mutations/resolvers/index.js
+
+            mutations
+              // Write the mutation schema + root schema to the output directory
+              .updateIn(['schema', 'file'], schemaFile => {
+                const rootSchemaFile = path.resolve(
+                  this.sourceDir, subgraph.getIn(['schema', 'file'])
+                )
+                schemaFile = path.resolve(this.sourceDir, schemaFile)
+
+                // Concatenate the schemas
+                let schemaData = fs.readFileSync(rootSchemaFile, 'utf-8')
+                schemaData += '\n' + fs.readFileSync(schemaFile, 'utf-8')
+
+                // Write the result to build/mutations/schema.graphql
+                return path.relative(
+                  this.options.outputDir,
+                  this._writeSubgraphFile(
+                    'mutations/schema.graphql',
+                    schemaData,
+                    this.sourceDir,
+                    this.options.outputDir,
+                    spinner
+                  )
+                )
+              })
+
+              // Write the resolvers file
+              .updateIn(['resolvers'], resolvers => {
+                const resolversKind = resolvers.get('kind')
+                switch (resolversKind) {
+                  case 'javascript':
+                    return resolvers.update('file', file => {
+                      const resolversData = fs.readFileSync(
+                        path.resolve(this.sourceDir, file), 'utf-8'
+                      )
+
+                      return path.relative(
+                        this.options.outputDir,
+                        this._writeSubgraphFile(
+                          'mutations/resolvers/index.js',
+                          resolversData,
+                          this.sourceDir,
+                          this.options.outputDir,
+                          spinner
+                        )
+                      )
+                    })
+                  default:
+                    throw Error(`Unimplemented resolvers kind '${resolversKind}'`)
+                }
+              })
+          )
+        }
+
         // Write the subgraph manifest itself
         let outputFilename = path.join(this.options.outputDir, 'subgraph.yaml')
         step(spinner, 'Write subgraph manifest', this.displayPath(outputFilename))

@@ -466,10 +466,10 @@ More than one template named '${name}', template names must be unique.`,
         // Adjust all relative paths within mutation's manifest
         const manifestDir = path.dirname(mutationsManifest)
         if (mutationsData.schema && mutationsData.schema.file) {
-          mutationsData.schema.file = `${manifestDir}/${mutationsData.schema.file}`
+          mutationsData.schema.file = path.join(manifestDir, mutationsData.schema.file)
         }
         if (mutationsData.resolvers && mutationsData.resolvers.file) {
-          mutationsData.resolvers.file = `${manifestDir}/${mutationsData.resolvers.file}`
+          mutationsData.resolvers.file = path.join(manifestDir, mutationsData.resolvers.file)
         }
 
         // Embed mutations manifest into root subgraph manifest
