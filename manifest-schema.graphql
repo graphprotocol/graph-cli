@@ -6,7 +6,7 @@ type Schema {
   file: File!
 }
 
-type Manifest {
+type ExternalMutations {
   file: File!
 }
 
@@ -86,17 +86,16 @@ type EthereumContractSourceTemplate {
   abi: String!
 }
 
-union Mutations = Manifest | MutationsManifest
-union Resolvers = JavascriptResolvers
+union Mutations = ExternalMutations | InlineMutations
 
-type JavascriptResolvers {
+type MutationResolvers {
   kind: String!
   file: File!
 }
 
-type MutationsManifest {
+type InlineMutations {
   specVersion: String!
   repository: String
   schema: Schema!
-  resolvers: Resolvers!
+  resolvers: MutationResolvers!
 }
