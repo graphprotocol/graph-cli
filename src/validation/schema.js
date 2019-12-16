@@ -402,7 +402,7 @@ const validateMutationTypeExists = defs =>
   defs.findIndex(def => def.name.value === "Mutation") === -1
     ? immutable.fromJS([
         {
-          loc: "",
+          loc: null,
           entity: "Mutation",
           message: "Mutation type not found",
         },
