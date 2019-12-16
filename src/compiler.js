@@ -108,15 +108,7 @@ class Compiler {
       if (subgraph.has('mutations')) {
         let mutations = subgraph.get('mutations')
         files.push(mutations.getIn(['schema', 'file']))
-
-        let resolversKind = mutations.getIn(['resolvers', 'kind'])
-        switch (resolversKind) {
-          case "javascript":
-            files.push(mutations.getIn(['resolvers', 'file']))
-            break;
-          default:
-            throw Error(`Unimplemented resolvers kind '${resolversKind}'`)
-        }
+        files.push(mutations.getIn(['resolvers', 'file']))
       }
 
       // Make paths absolute
@@ -509,14 +501,13 @@ class Compiler {
                 schemaFile = path.resolve(this.sourceDir, schemaFile)
 
                 // Concatenate the schemas
-                let schemaData = fs.readFileSync(rootSchemaFile, 'utf-8')
-                schemaData += '\n' + fs.readFileSync(schemaFile, 'utf-8')
+                let schemaData = fs.readFileSync(rootSchemaFile, 'utf-8') + '\n' + fs.readFileSync(schemaFile, 'utf-8')
 
                 // Write the result to build/mutations/schema.graphql
                 return path.relative(
                   this.options.outputDir,
                   this._writeSubgraphFile(
-                    'mutations/schema.graphql',
+                    path.join('mutations', 'schema.graphql'),
                     schemaData,
                     this.sourceDir,
                     this.options.outputDir,
@@ -527,9 +518,6 @@ class Compiler {
 
               // Write the resolvers file
               .updateIn(['resolvers'], resolvers => {
-                const resolversKind = resolvers.get('kind')
-                switch (resolversKind) {
-                  case 'javascript':
                     return resolvers.update('file', file => {
                       const resolversData = fs.readFileSync(
                         path.resolve(this.sourceDir, file), 'utf-8'
@@ -538,7 +526,7 @@ class Compiler {
                       return path.relative(
                         this.options.outputDir,
                         this._writeSubgraphFile(
-                          'mutations/resolvers/index.js',
+                      path.join('mutations', 'resolvers', 'index.js'),
                           resolversData,
                           this.sourceDir,
                           this.options.outputDir,
@@ -546,9 +534,6 @@ class Compiler {
                         )
                       )
                     })
-                  default:
-                    throw Error(`Unimplemented resolvers kind '${resolversKind}'`)
-                }
               })
           )
         }
