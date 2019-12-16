@@ -356,7 +356,9 @@ const validateManifest = (value, type, schema, { resolveFile }) => {
   
   errors = errors.concat(validateDataSourceNetworks(value))
 
-  errors = errors.concat(validateMutationResolvers(value))
+  if(value.mutations){
+    errors = errors.concat(validateMutationResolvers(value))
+  }
 
   return errors;
 }
