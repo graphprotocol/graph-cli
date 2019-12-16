@@ -69,29 +69,9 @@ const validators = immutable.fromJS({
     switch (path) {
       case "mutations": {
         if (value.get('file')) {
-          unionType = "Manifest";
+          unionType = "ExternalMutations";
         } else {
-          unionType = "MutationsManifest";
-        }
-        break;
-      }
-      case "mutations.resolvers": {
-        if(!value.get('kind')){
-          return immutable.fromJS([
-            {
-              path: [...ctx.get('path'), 'kind'],
-              message: `No value provided`,
-            },
-          ])
-        } else if (value.get('kind') === "javascript") {
-          unionType = "JavascriptResolvers"
-        } else {
-          return immutable.fromJS([
-            {
-              path: [...ctx.get('path'), 'kind'],
-              message: `Mutation resolvers of kind "${value.get('kind')}" are not supported`,
-            },
-          ])
+          unionType = "InlineMutations";
         }
         break;
       }
@@ -330,8 +310,22 @@ Recommendation: Make all data sources and templates use the same network name.`,
     : List()
 }
 
+const validateMutationResolvers = value => {
+  const supportedKinds = ['javascript'];
+
+  return supportedKinds.includes(value.mutations.resolvers.kind)?
+    List():
+    immutable.fromJS([
+      {
+        path: ['mutations', 'resolvers', 'kind'],
+        message: `Mutation resolvers of ${value.mutations.resolvers.kind} are not supported`,
+      },
+    ])
+}
+
 const validateManifest = (value, type, schema, { resolveFile }) => {
   // Validate manifest using the GraphQL schema that defines its structure
+
   let errors =
     value !== null && value !== undefined
       ? validateValue(
@@ -359,7 +353,12 @@ const validateManifest = (value, type, schema, { resolveFile }) => {
 
   // Validate that all data sources are for the same `network` (this includes
   // _no_ network at all)
-  return validateDataSourceNetworks(value)
+  
+  errors = errors.concat(validateDataSourceNetworks(value))
+
+  errors = errors.concat(validateMutationResolvers(value))
+
+  return errors;
 }
 
 module.exports = { validateManifest }
