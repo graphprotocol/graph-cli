@@ -121,16 +121,8 @@ module.exports = class Subgraph {
     if (manifest.get('mutations')) {
       const resolversFile = manifest.getIn(['mutations', 'resolvers', 'file'])
       const schemaFile = manifest.getIn(['mutations', 'schema', 'file'])
-      const errorMsg = validation.validateMutationResolvers(resolversFile, schemaFile, { resolveFile })
-
-      if (errorMsg) {
-        return immutable.fromJS([
-          {
-            path: ['mutations', 'resolvers', 'file'],
-            message: errorMsg
-          }
-        ])
-      }
+      const errors = validation.validateMutationResolvers(resolversFile, schemaFile, { resolveFile })
+      return errors;
     }
 
     return immutable.List()
