@@ -4,3 +4,4 @@ schema:
   file: ./schema.graphql
 resolvers:
   kind: UnsupportedLanguage
+  file: ./index.js

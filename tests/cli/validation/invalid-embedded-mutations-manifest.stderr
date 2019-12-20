@@ -9,3 +9,6 @@
 
   Path: mutations > resolvers > kind
   No value provided
+
+  Path: mutations > resolvers > file
+  File does not exist: dist/index.js

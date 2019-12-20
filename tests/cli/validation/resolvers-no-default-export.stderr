@@ -3,3 +3,6 @@
 
   Path: mutations > resolvers > file
   'resolvers' object not found in the default export
+
+  Path: mutations > resolvers > file
+  'config' object not found in the default export
