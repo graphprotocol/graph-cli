@@ -380,10 +380,12 @@ const validateNoOtherTypesExceptMutation = defs =>
               {
                 loc: def.loc,
                 entity: def.name.value,
-                message:
-                  `ObjectTypeDefinition '${def.name.value}' found, Mutation ` +
-                  "must be the only type. Try using 'input' for mutation arguments, " +
-                  "'interface' for mutation return values, or existing @entity types from the subgraph schema.",
+                message:`\
+Encountered object type '${def.name.value}'. 'Mutation' is the only \
+object type allowed in the mutation schema.\
+\
+For mutation arguments, use 'input' types. For return values, use either \
+entity types from the subgraph schema or 'interface' types.`,
               },
             ]),
           )
