@@ -14,10 +14,10 @@ const createJsonRpcClient = url => {
     return jayson.Client.http(params)
   } else {
     toolbox.print.error(
-      `Unsupported protocol: ${url.protocol.substring(0, url.protocol.length - 1)}`
+      `Unsupported protocol: ${url.protocol.substring(0, url.protocol.length - 1)}`,
     )
     toolbox.print.error(
-      'The Graph Node URL must be of the following format: http(s)://host[:port]/[path]'
+      'The Graph Node URL must be of the following format: http(s)://host[:port]/[path]',
     )
     return null
   }

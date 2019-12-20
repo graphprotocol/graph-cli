@@ -164,9 +164,10 @@ const loadAbiFromBlockScout = async (network, address) =>
     `Warnings while fetching ABI from BlockScout`,
     async spinner => {
       let result = await fetch(
-        `https://blockscout.com/${
-          network.replace('-', '/')
-        }/api?module=contract&action=getabi&address=${address}`,
+        `https://blockscout.com/${network.replace(
+          '-',
+          '/',
+        )}/api?module=contract&action=getabi&address=${address}`,
       )
       let json = await result.json()
 
