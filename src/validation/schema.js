@@ -382,7 +382,7 @@ const validateNoOtherTypesExceptMutation = defs =>
                 entity: def.name.value,
                 message:`\
 Encountered object type '${def.name.value}'. 'Mutation' is the only \
-object type allowed in the mutation schema.\
+object type allowed in the mutation schema. \
 \
 For mutation arguments, use 'input' types. For return values, use either \
 entity types from the subgraph schema or 'interface' types.`,
