@@ -4,7 +4,7 @@ const { saveAccessToken } = require('../command-helpers/auth')
 
 const HELP = `
 ${chalk.bold('graph auth')} [options] ${chalk.bold('<node>')} ${chalk.bold(
-  '<access-token>'
+  '<access-token>',
 )}
 
 ${chalk.dim('Options:')}

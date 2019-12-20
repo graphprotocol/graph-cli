@@ -108,15 +108,7 @@ class Compiler {
       if (subgraph.has('mutations')) {
         let mutations = subgraph.get('mutations')
         files.push(mutations.getIn(['schema', 'file']))
-
-        let resolversKind = mutations.getIn(['resolvers', 'kind'])
-        switch (resolversKind) {
-          case "javascript":
-            files.push(mutations.getIn(['resolvers', 'file']))
-            break;
-          default:
-            throw Error(`Unimplemented resolvers kind '${resolversKind}'`)
-        }
+        files.push(mutations.getIn(['resolvers', 'file']))
       }
 
       // Make paths absolute
@@ -498,58 +490,56 @@ class Compiler {
         if (subgraph.has('mutations')) {
           // Copy mutation files and update their paths
           subgraph = subgraph.update('mutations', mutations =>
-            // mutations/schema.graphql + mutations/resolvers/index.js
+            // mutations/schema.graphql + mutations/index.js
 
             mutations
               // Write the mutation schema + root schema to the output directory
               .updateIn(['schema', 'file'], schemaFile => {
                 const rootSchemaFile = path.resolve(
-                  this.sourceDir, subgraph.getIn(['schema', 'file'])
+                  this.sourceDir,
+                  subgraph.getIn(['schema', 'file']),
                 )
                 schemaFile = path.resolve(this.sourceDir, schemaFile)
 
                 // Concatenate the schemas
-                let schemaData = fs.readFileSync(rootSchemaFile, 'utf-8')
-                schemaData += '\n' + fs.readFileSync(schemaFile, 'utf-8')
+                let schemaData =
+                  fs.readFileSync(rootSchemaFile, 'utf-8') +
+                  '\n' +
+                  fs.readFileSync(schemaFile, 'utf-8')
 
                 // Write the result to build/mutations/schema.graphql
                 return path.relative(
                   this.options.outputDir,
                   this._writeSubgraphFile(
-                    'mutations/schema.graphql',
+                    path.join('mutations', 'schema.graphql'),
                     schemaData,
                     this.sourceDir,
                     this.options.outputDir,
-                    spinner
-                  )
+                    spinner,
+                  ),
                 )
               })
 
-              // Write the resolvers file
+              // Write the resolvers file to build/mutations/index.js
               .updateIn(['resolvers'], resolvers => {
-                const resolversKind = resolvers.get('kind')
-                switch (resolversKind) {
-                  case 'javascript':
-                    return resolvers.update('file', file => {
-                      const resolversData = fs.readFileSync(
-                        path.resolve(this.sourceDir, file), 'utf-8'
-                      )
+                return resolvers.update('file', file => {
+                  const resolversData = fs.readFileSync(
+                    path.resolve(this.sourceDir, file),
+                    'utf-8',
+                  )
 
-                      return path.relative(
-                        this.options.outputDir,
-                        this._writeSubgraphFile(
-                          'mutations/resolvers/index.js',
-                          resolversData,
-                          this.sourceDir,
-                          this.options.outputDir,
-                          spinner
-                        )
-                      )
-                    })
-                  default:
-                    throw Error(`Unimplemented resolvers kind '${resolversKind}'`)
-                }
-              })
+                  return path.relative(
+                    this.options.outputDir,
+                    this._writeSubgraphFile(
+                      path.join('mutations', 'index.js'),
+                      resolversData,
+                      this.sourceDir,
+                      this.options.outputDir,
+                      spinner,
+                    ),
+                  )
+                })
+              }),
           )
         }
 
@@ -635,11 +625,11 @@ class Compiler {
         }
 
         // Upload mutations schema and resolvers if present
-        if(subgraph.get('mutations')){
+        if (subgraph.get('mutations')) {
           const filePaths = [
             ['mutations', 'schema', 'file'],
-            ['mutations', 'resolvers','file']
-          ];
+            ['mutations', 'resolvers', 'file'],
+          ]
 
           for (const path of filePaths) {
             updates.push({
@@ -649,7 +639,7 @@ class Compiler {
                 uploadedFiles,
                 spinner,
               ),
-            });
+            })
           }
         }
 

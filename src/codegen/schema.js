@@ -27,9 +27,9 @@ module.exports = class SchemaCodeGenerator {
           'Address',
           'Bytes',
           'BigInt',
-          'BigDecimal'
+          'BigDecimal',
         ],
-        '@graphprotocol/graph-ts'
+        '@graphprotocol/graph-ts',
       ),
     ]
   }
@@ -65,7 +65,7 @@ module.exports = class SchemaCodeGenerator {
       .get('fields')
       .reduce(
         (methods, field) => methods.concat(this._generateEntityFieldMethods(def, field)),
-        List()
+        List(),
       )
       .forEach(method => klass.addMethod(method))
 
@@ -80,7 +80,7 @@ module.exports = class SchemaCodeGenerator {
       `
       super()
       this.set('id', Value.fromString(id))
-      `
+      `,
     )
   }
 
@@ -98,7 +98,7 @@ module.exports = class SchemaCodeGenerator {
           'Cannot save ${entityName} entity with non-string ID. ' +
           'Considering using .toHex() to convert the "id" to a string.'
         )
-        store.set('${entityName}', id.toString(), this)`
+        store.set('${entityName}', id.toString(), this)`,
       ),
 
       tsCodegen.staticMethod(
@@ -107,8 +107,8 @@ module.exports = class SchemaCodeGenerator {
         tsCodegen.nullableType(tsCodegen.namedType(entityName)),
         `
         return store.get('${entityName}', id) as ${entityName} | null
-        `
-      )
+        `,
+      ),
     )
   }
 
@@ -125,17 +125,14 @@ module.exports = class SchemaCodeGenerator {
     let fieldValueType = this._valueTypeFromGraphQl(gqlType)
     let returnType = this._typeFromGraphQl(gqlType)
 
-    let getNonNullable = `return ${typesCodegen.valueToAsc(
-                            'value',
-                            fieldValueType
-                          )}`
+    let getNonNullable = `return ${typesCodegen.valueToAsc('value', fieldValueType)}`
     let getNullable = `if (value === null) {
                           return null
                         } else {
                           ${getNonNullable}
                         }`
-    
-    let isNullable = returnType instanceof tsCodegen.NullableType 
+
+    let isNullable = returnType instanceof tsCodegen.NullableType
     return tsCodegen.method(
       `get ${name}`,
       [],
@@ -143,7 +140,7 @@ module.exports = class SchemaCodeGenerator {
       `
        let value = this.get('${name}')
        ${isNullable ? getNullable : getNonNullable}
-      `
+      `,
     )
   }
 
@@ -163,9 +160,9 @@ module.exports = class SchemaCodeGenerator {
         this.unset('${name}')
       } else {
         this.set('${name}', ${typesCodegen.valueFromAsc(
-          `value as ${paramTypeString}`,
-          fieldValueType
-        )})
+      `value as ${paramTypeString}`,
+      fieldValueType,
+    )})
       }
     `
 
@@ -173,7 +170,7 @@ module.exports = class SchemaCodeGenerator {
       `set ${name}`,
       [tsCodegen.param('value', paramType)],
       undefined,
-      isNullable ? setNullable : setNonNullable
+      isNullable ? setNullable : setNonNullable,
     )
   }
 
@@ -181,8 +178,8 @@ module.exports = class SchemaCodeGenerator {
     return gqlType.get('kind') === 'NonNullType'
       ? this._valueTypeFromGraphQl(gqlType.get('type'), false)
       : gqlType.get('kind') === 'ListType'
-        ? '[' + this._valueTypeFromGraphQl(gqlType.get('type')) + ']'
-        : gqlType.getIn(['name', 'value'])
+      ? '[' + this._valueTypeFromGraphQl(gqlType.get('type')) + ']'
+      : gqlType.getIn(['name', 'value'])
   }
 
   _typeFromGraphQl(gqlType, nullable = true) {
@@ -191,9 +188,10 @@ module.exports = class SchemaCodeGenerator {
     } else if (gqlType.get('kind') === 'ListType') {
       let type = tsCodegen.arrayType(this._typeFromGraphQl(gqlType.get('type')))
       return nullable ? tsCodegen.nullableType(type) : type
-    } else { // NamedType
+    } else {
+      // NamedType
       let type = tsCodegen.namedType(
-        typesCodegen.ascTypeForValue(gqlType.getIn(['name', 'value']))
+        typesCodegen.ascTypeForValue(gqlType.getIn(['name', 'value'])),
       )
       // In AssemblyScript, primitives cannot be nullable.
       return nullable && !type.isPrimitive() ? tsCodegen.nullableType(type) : type

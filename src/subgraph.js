@@ -121,16 +121,9 @@ module.exports = class Subgraph {
     if (manifest.get('mutations')) {
       const resolversFile = manifest.getIn(['mutations', 'resolvers', 'file'])
       const schemaFile = manifest.getIn(['mutations', 'schema', 'file'])
-      const errorMsg = validation.validateMutationResolvers(resolversFile, schemaFile, { resolveFile })
-
-      if (errorMsg) {
-        return immutable.fromJS([
-          {
-            path: ['mutations', 'resolvers', 'file'],
-            message: errorMsg
-          }
-        ])
-      }
+      return validation.validateMutationResolvers(resolversFile, schemaFile, {
+        resolveFile,
+      })
     }
 
     return immutable.List()
@@ -412,21 +405,23 @@ More than one data source named '${name}', data source names must be unique.`,
 
   static validateUniqueTemplateNames(manifest) {
     let names = []
-    return manifest.get('templates', immutable.List()).reduce((errors, template, templateIndex) => {
-      let path = ['templates', templateIndex, 'name']
-      let name = template.get('name')
-      if (names.includes(name)) {
-        errors = errors.push(
-          immutable.fromJS({
-            path,
-            message: `\
+    return manifest
+      .get('templates', immutable.List())
+      .reduce((errors, template, templateIndex) => {
+        let path = ['templates', templateIndex, 'name']
+        let name = template.get('name')
+        if (names.includes(name)) {
+          errors = errors.push(
+            immutable.fromJS({
+              path,
+              message: `\
 More than one template named '${name}', template names must be unique.`,
-          }),
-        )
-      }
-      names.push(name)
-      return errors
-    }, immutable.List())
+            }),
+          )
+        }
+        names.push(name)
+        return errors
+      }, immutable.List())
   }
 
   static dump(manifest) {
@@ -446,17 +441,22 @@ More than one template named '${name}', template names must be unique.`,
 
     // If a mutation manifest file reference is present,
     // embed the contents into the root subgraph manifest.
-    if (data.mutations && data.mutations.file) { 
-
+    if (data.mutations && data.mutations.file) {
       // Validate the data.mutations.file field before we operate with it
       const mutationsManifest = data.mutations.file
       if (!fs.existsSync(mutationsManifest)) {
-        throwCombinedError(filename, immutable.fromJS([
-          {
-            path: ['mutations', 'file'],
-            message: `File does not exist: ${path.relative(process.cwd(), mutationsManifest)}`,
-          },
-        ]))
+        throwCombinedError(
+          filename,
+          immutable.fromJS([
+            {
+              path: ['mutations', 'file'],
+              message: `File does not exist: ${path.relative(
+                process.cwd(),
+                mutationsManifest,
+              )}`,
+            },
+          ]),
+        )
       }
 
       // Open and parse the mutation manifest file
@@ -469,18 +469,24 @@ More than one template named '${name}', template names must be unique.`,
           mutationsData.schema.file = path.join(manifestDir, mutationsData.schema.file)
         }
         if (mutationsData.resolvers && mutationsData.resolvers.file) {
-          mutationsData.resolvers.file = path.join(manifestDir, mutationsData.resolvers.file)
+          mutationsData.resolvers.file = path.join(
+            manifestDir,
+            mutationsData.resolvers.file,
+          )
         }
 
         // Embed mutations manifest into root subgraph manifest
         data.mutations = mutationsData
       } catch (e) {
-        throwCombinedError(mutationsManifest, immutable.fromJS([
-          {
-            path: ['mutations', 'file'],
-            message: e.message,
-          },
-        ]))
+        throwCombinedError(
+          mutationsManifest,
+          immutable.fromJS([
+            {
+              path: ['mutations', 'file'],
+              message: e.message,
+            },
+          ]),
+        )
       }
     }
 
