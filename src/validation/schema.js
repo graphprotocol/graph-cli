@@ -49,7 +49,7 @@ const typeSuggestion = typeName =>
 
 const loadSchema = filename => {
   try {
-    fs.readFileSync(filename, 'utf-8')
+    return fs.readFileSync(filename, 'utf-8')
   } catch (e) {
     throw new Error(`Failed to load GraphQL schema: ${e}`)
   }
