@@ -6,10 +6,6 @@ type Schema {
   file: File!
 }
 
-type ExternalMutations {
-  file: File!
-}
-
 union DataSource = EthereumContractDataSource
 union DataSourceTemplate = EthereumContractDataSourceTemplate
 
@@ -88,8 +84,7 @@ type EthereumContractSourceTemplate {
 
 union Mutations = ExternalMutations | InlineMutations
 
-type MutationResolvers {
-  kind: String!
+type ExternalMutations {
   file: File!
 }
 
@@ -98,4 +93,9 @@ type InlineMutations {
   repository: String
   schema: Schema!
   resolvers: MutationResolvers!
+}
+
+type MutationResolvers {
+  kind: String!
+  file: File!
 }
