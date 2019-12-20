@@ -490,7 +490,7 @@ class Compiler {
         if (subgraph.has('mutations')) {
           // Copy mutation files and update their paths
           subgraph = subgraph.update('mutations', mutations =>
-            // mutations/schema.graphql + mutations/resolvers/index.js
+            // mutations/schema.graphql + mutations/index.js
 
             mutations
               // Write the mutation schema + root schema to the output directory
@@ -516,7 +516,7 @@ class Compiler {
                 )
               })
 
-              // Write the resolvers file
+              // Write the resolvers file to build/mutations/index.js
               .updateIn(['resolvers'], resolvers => {
                     return resolvers.update('file', file => {
                       const resolversData = fs.readFileSync(
@@ -526,7 +526,7 @@ class Compiler {
                       return path.relative(
                         this.options.outputDir,
                         this._writeSubgraphFile(
-                      path.join('mutations', 'resolvers', 'index.js'),
+                          path.join('mutations', 'index.js'),
                           resolversData,
                           this.sourceDir,
                           this.options.outputDir,
