@@ -318,13 +318,14 @@ Recommendation: Make all data sources and templates use the same network name.`,
 
 const validateMutationResolvers = value => {
   const supportedKinds = ['javascript']
+  const resolversKind = value.mutations.resolvers.kind
 
-  return supportedKinds.includes(value.mutations.resolvers.kind)
+  return supportedKinds.includes(resolversKind)
     ? List()
     : immutable.fromJS([
         {
           path: ['mutations', 'resolvers', 'kind'],
-          message: `Mutation resolvers of ${value.mutations.resolvers.kind} are not supported`,
+          message: `Mutation resolvers of kind "${resolversKind}" are not supported`,
         },
       ])
 }
