@@ -66,6 +66,26 @@ module.exports.validateMutationResolvers = (
           },
         ]),
       )
+    } else {
+      // Validate the resolver's shape matches the Mutation shape
+      const mutationsSchema = graphql.parse(fs.readFileSync(schemaFile, 'utf-8'))
+      const mutationDef = mutationsSchema.definitions.find(
+        def => def.name.value === 'Mutation',
+      )
+      const resolvers = resolversModule.resolvers.Mutation
+
+      for (const field of mutationDef.fields) {
+        if (!resolvers[field.name.value]) {
+          errors = errors.concat(
+            immutable.fromJS([
+              {
+                path: ['mutations', 'resolvers', 'file'],
+                message: `resolvers missing property ${field.name.value}`,
+              },
+            ]),
+          )
+        }
+      }
     }
 
     // Validate each config "leaf" property has a function that takes one argument
@@ -106,26 +126,6 @@ module.exports.validateMutationResolvers = (
     }
 
     errors = errors.concat(validateLeafProp('config', resolversModule.config, true))
-
-    // Validate the resolver's shape matches the Mutation shape
-    const mutationsSchema = graphql.parse(fs.readFileSync(schemaFile, 'utf-8'))
-    const mutationDef = mutationsSchema.definitions.find(
-      def => def.name.value === 'Mutation',
-    )
-    const resolvers = resolversModule.resolvers.Mutation
-
-    for (const field of mutationDef.fields) {
-      if (!resolvers[field.name.value]) {
-        errors = errors.concat(
-          immutable.fromJS([
-            {
-              path: ['mutations', 'resolvers', 'file'],
-              message: `resolvers missing property ${field.name.value}`,
-            },
-          ]),
-        )
-      }
-    }
 
     // Validate the resolver's module is ES5 compliant
     try {
