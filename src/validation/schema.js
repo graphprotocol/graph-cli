@@ -417,7 +417,7 @@ const validateSchema = (rootFile, mutationsFile) => {
   let schemas = [rootFile]
 
   // If the mutation schema is provided, concatenate it
-  // to the end of the root schema, and it separately
+  // to the end of the root schema, and validate it seperately
   if (mutationsFile) {
     schemas.push(mutationsFile)
 
