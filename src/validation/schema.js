@@ -47,14 +47,9 @@ const typeSuggestion = typeName =>
     return typeof pattern === 'string' ? pattern === typeName : typeName.match(pattern)
   }).map(([_, suggestion]) => suggestion)[0]
 
-const loadSchema = filenames => {
+const loadSchema = filename => {
   try {
-    // Concatenate multiple schema files together
-    let result = ''
-    for (filename of filenames) {
-      result += fs.readFileSync(filename, 'utf-8')
-    }
-    return result
+    fs.readFileSync(filename, 'utf-8')
   } catch (e) {
     throw new Error(`Failed to load GraphQL schema: ${e}`)
   }
@@ -414,17 +409,16 @@ const validateMutationsSchema = defs =>
   )
 
 const validateSchema = (rootFile, mutationsFile) => {
-  let schemas = [rootFile]
+  let schemaDoc = loadSchema(rootFile)
 
   // If the mutation schema is provided, concatenate it
   // to the end of the root schema, and validate it seperately
   if (mutationsFile) {
-    schemas.push(mutationsFile)
-
     // Parse the mutations schema and ensure it doesn't
     // contain new type definitions that aren't the Mutation
-    let mutationsDoc = loadSchema([mutationsFile])
+    let mutationsDoc = loadSchema(mutationsFile)
     let mutationsSchema = parseSchema(mutationsDoc)
+    schemaDoc += `\n${mutationsDoc}`
 
     let errors = validateMutationsSchema(mutationsSchema.definitions)
     if (errors.size > 0) {
@@ -432,9 +426,7 @@ const validateSchema = (rootFile, mutationsFile) => {
     }
   }
 
-  let doc = loadSchema(schemas)
-  let schema = parseSchema(doc)
-
+  let schema = parseSchema(schemaDoc)
   return validateTypeDefinitions(schema.definitions)
 }
 
