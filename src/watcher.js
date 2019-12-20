@@ -55,7 +55,7 @@ module.exports = class Watcher {
               files.push(path.resolve(path.join(dirname, filename)))
               return files
             }, files),
-          []
+          [],
         )
 
         let diff = (xs, ys) => ({

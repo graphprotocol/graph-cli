@@ -496,12 +496,16 @@ class Compiler {
               // Write the mutation schema + root schema to the output directory
               .updateIn(['schema', 'file'], schemaFile => {
                 const rootSchemaFile = path.resolve(
-                  this.sourceDir, subgraph.getIn(['schema', 'file'])
+                  this.sourceDir,
+                  subgraph.getIn(['schema', 'file']),
                 )
                 schemaFile = path.resolve(this.sourceDir, schemaFile)
 
                 // Concatenate the schemas
-                let schemaData = fs.readFileSync(rootSchemaFile, 'utf-8') + '\n' + fs.readFileSync(schemaFile, 'utf-8')
+                let schemaData =
+                  fs.readFileSync(rootSchemaFile, 'utf-8') +
+                  '\n' +
+                  fs.readFileSync(schemaFile, 'utf-8')
 
                 // Write the result to build/mutations/schema.graphql
                 return path.relative(
@@ -511,30 +515,31 @@ class Compiler {
                     schemaData,
                     this.sourceDir,
                     this.options.outputDir,
-                    spinner
-                  )
+                    spinner,
+                  ),
                 )
               })
 
               // Write the resolvers file to build/mutations/index.js
               .updateIn(['resolvers'], resolvers => {
-                    return resolvers.update('file', file => {
-                      const resolversData = fs.readFileSync(
-                        path.resolve(this.sourceDir, file), 'utf-8'
-                      )
+                return resolvers.update('file', file => {
+                  const resolversData = fs.readFileSync(
+                    path.resolve(this.sourceDir, file),
+                    'utf-8',
+                  )
 
-                      return path.relative(
-                        this.options.outputDir,
-                        this._writeSubgraphFile(
-                          path.join('mutations', 'index.js'),
-                          resolversData,
-                          this.sourceDir,
-                          this.options.outputDir,
-                          spinner
-                        )
-                      )
-                    })
-              })
+                  return path.relative(
+                    this.options.outputDir,
+                    this._writeSubgraphFile(
+                      path.join('mutations', 'index.js'),
+                      resolversData,
+                      this.sourceDir,
+                      this.options.outputDir,
+                      spinner,
+                    ),
+                  )
+                })
+              }),
           )
         }
 
@@ -620,11 +625,11 @@ class Compiler {
         }
 
         // Upload mutations schema and resolvers if present
-        if(subgraph.get('mutations')){
+        if (subgraph.get('mutations')) {
           const filePaths = [
             ['mutations', 'schema', 'file'],
-            ['mutations', 'resolvers','file']
-          ];
+            ['mutations', 'resolvers', 'file'],
+          ]
 
           for (const path of filePaths) {
             updates.push({
@@ -634,7 +639,7 @@ class Compiler {
                 uploadedFiles,
                 spinner,
               ),
-            });
+            })
           }
         }
 
