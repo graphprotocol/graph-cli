@@ -1,0 +1,8 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
+
+  Path: mutations > resolvers > file
+  'resolvers' object not found in the default export
+
+  Path: mutations > resolvers > file
+  'config' object not found in the default export

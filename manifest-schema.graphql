@@ -63,6 +63,7 @@ type EthereumContractEventHandler {
 type SubgraphManifest {
   specVersion: String!
   schema: Schema!
+  mutations: Mutations
   description: String
   repository: String
   dataSources: [DataSource!]!
@@ -79,4 +80,22 @@ type EthereumContractDataSourceTemplate {
 
 type EthereumContractSourceTemplate {
   abi: String!
+}
+
+union Mutations = ExternalMutations | InlineMutations
+
+type ExternalMutations {
+  file: File!
+}
+
+type InlineMutations {
+  specVersion: String!
+  repository: String
+  schema: Schema!
+  resolvers: MutationResolvers!
+}
+
+type MutationResolvers {
+  kind: String!
+  file: File!
 }

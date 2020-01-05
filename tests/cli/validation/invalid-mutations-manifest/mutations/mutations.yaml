@@ -1,0 +1,5 @@
+repository: https://npmjs.com/package/gravatar-mutations
+schema:
+  file: ./nonexistent.graphql
+resolvers:
+  file: ./dist/index.js

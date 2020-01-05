@@ -1,0 +1,13 @@
+schema:
+  file: ./non-existent.grapqhl
+dataSources:
+  - kind: ethereum/contract
+    name: 5
+    abis:
+      name: Foo
+    mapping:
+      - 12
+      - 13
+      - 14
+templates:
+  field: foo

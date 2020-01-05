@@ -58,6 +58,12 @@ module.exports = class Subgraph {
     let filename = resolveFile(manifest.getIn(['schema', 'file']))
     let errors = validation.validateSchema(filename)
 
+    // If mutations are being used, validate the mutation schema
+    if (manifest.get('mutations')) {
+      const mutationSchemaFilename = manifest.getIn(['mutations', 'schema', 'file'])
+      errors = validation.validateSchema(filename, mutationSchemaFilename)
+    }
+
     if (errors.size > 0) {
       errors = errors.groupBy(error => error.get('entity')).sort()
 
@@ -109,6 +115,18 @@ module.exports = class Subgraph {
           : templates,
       immutable.List(),
     )
+  }
+
+  static validateMutationResolvers(manifest, { resolveFile }) {
+    if (manifest.get('mutations')) {
+      const resolversFile = manifest.getIn(['mutations', 'resolvers', 'file'])
+      const schemaFile = manifest.getIn(['mutations', 'schema', 'file'])
+      return validation.validateMutationResolvers(resolversFile, schemaFile, {
+        resolveFile,
+      })
+    }
+
+    return immutable.List()
   }
 
   static validateDataSourceAbis(dataSource, { resolveFile, path }) {
@@ -387,21 +405,23 @@ More than one data source named '${name}', data source names must be unique.`,
 
   static validateUniqueTemplateNames(manifest) {
     let names = []
-    return manifest.get('templates', immutable.List()).reduce((errors, template, templateIndex) => {
-      let path = ['templates', templateIndex, 'name']
-      let name = template.get('name')
-      if (names.includes(name)) {
-        errors = errors.push(
-          immutable.fromJS({
-            path,
-            message: `\
+    return manifest
+      .get('templates', immutable.List())
+      .reduce((errors, template, templateIndex) => {
+        let path = ['templates', templateIndex, 'name']
+        let name = template.get('name')
+        if (names.includes(name)) {
+          errors = errors.push(
+            immutable.fromJS({
+              path,
+              message: `\
 More than one template named '${name}', template names must be unique.`,
-          }),
-        )
-      }
-      names.push(name)
-      return errors
-    }, immutable.List())
+            }),
+          )
+        }
+        names.push(name)
+        return errors
+      }, immutable.List())
   }
 
   static dump(manifest) {
@@ -418,6 +438,57 @@ More than one template named '${name}', template names must be unique.`,
     // Helper to resolve files relative to the subgraph manifest
     let resolveFile = maybeRelativeFile =>
       path.resolve(path.dirname(filename), maybeRelativeFile)
+
+    // If a mutation manifest file reference is present,
+    // embed the contents into the root subgraph manifest.
+    if (data.mutations && data.mutations.file) {
+      // Validate the data.mutations.file field before we operate with it
+      const mutationsManifest = data.mutations.file
+      if (!fs.existsSync(mutationsManifest)) {
+        throwCombinedError(
+          filename,
+          immutable.fromJS([
+            {
+              path: ['mutations', 'file'],
+              message: `File does not exist: ${path.relative(
+                process.cwd(),
+                mutationsManifest,
+              )}`,
+            },
+          ]),
+        )
+      }
+
+      // Open and parse the mutation manifest file
+      try {
+        const mutationsData = yaml.parse(fs.readFileSync(mutationsManifest, 'utf-8'))
+
+        // Adjust all relative paths within mutation's manifest
+        const manifestDir = path.dirname(mutationsManifest)
+        if (mutationsData.schema && mutationsData.schema.file) {
+          mutationsData.schema.file = path.join(manifestDir, mutationsData.schema.file)
+        }
+        if (mutationsData.resolvers && mutationsData.resolvers.file) {
+          mutationsData.resolvers.file = path.join(
+            manifestDir,
+            mutationsData.resolvers.file,
+          )
+        }
+
+        // Embed mutations manifest into root subgraph manifest
+        data.mutations = mutationsData
+      } catch (e) {
+        throwCombinedError(
+          mutationsManifest,
+          immutable.fromJS([
+            {
+              path: ['mutations', 'file'],
+              message: e.message,
+            },
+          ]),
+        )
+      }
+    }
 
     let manifestErrors = Subgraph.validate(data, { resolveFile })
     if (manifestErrors.size > 0) {
@@ -440,6 +511,7 @@ More than one template named '${name}', template names must be unique.`,
           ...Subgraph.validateCallFunctions(manifest, { resolveFile }),
           ...Subgraph.validateUniqueDataSourceNames(manifest),
           ...Subgraph.validateUniqueTemplateNames(manifest),
+          ...Subgraph.validateMutationResolvers(manifest, { resolveFile }),
         )
 
     if (errors.size > 0) {

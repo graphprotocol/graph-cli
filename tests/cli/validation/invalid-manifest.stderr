@@ -10,22 +10,6 @@
   Path: dataSources > 0 > kind
   No value provided
 
-  Path: dataSources > 0 > name
-  Expected string, found number:
-  5
-
-  Path: dataSources > 0 > source
-  No value provided
-
-  Path: dataSources > 0 > mapping
-  Expected map, found list:
-  - 12
-  - 13
-  - 14
-
-  Path: dataSources > 0
-  Unexpected key in map: abis
-
   Path: templates
   Expected list, found map:
   field: foo

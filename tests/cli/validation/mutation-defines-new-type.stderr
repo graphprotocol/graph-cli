@@ -1,0 +1,5 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Error in schema.graphql:
+
+  NewType:
+  - Encountered object type 'NewType'. 'Mutation' is the only object type allowed in the mutation schema. For mutation arguments, use 'input' types. For return values, use either entity types from the subgraph schema or 'interface' types.

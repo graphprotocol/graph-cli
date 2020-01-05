@@ -104,6 +104,13 @@ class Compiler {
         })
       })
 
+      // Add mutation files
+      if (subgraph.has('mutations')) {
+        let mutations = subgraph.get('mutations')
+        files.push(mutations.getIn(['schema', 'file']))
+        files.push(mutations.getIn(['resolvers', 'file']))
+      }
+
       // Make paths absolute
       return files.map(file => path.resolve(file))
     } catch (e) {
@@ -480,6 +487,62 @@ class Compiler {
               )
         })
 
+        if (subgraph.has('mutations')) {
+          // Copy mutation files and update their paths
+          subgraph = subgraph.update('mutations', mutations =>
+            // mutations/schema.graphql + mutations/index.js
+
+            mutations
+              // Write the mutation schema + root schema to the output directory
+              .updateIn(['schema', 'file'], schemaFile => {
+                const rootSchemaFile = path.resolve(
+                  this.sourceDir,
+                  subgraph.getIn(['schema', 'file']),
+                )
+                schemaFile = path.resolve(this.sourceDir, schemaFile)
+
+                // Concatenate the schemas
+                let schemaData =
+                  fs.readFileSync(rootSchemaFile, 'utf-8') +
+                  '\n' +
+                  fs.readFileSync(schemaFile, 'utf-8')
+
+                // Write the result to build/mutations/schema.graphql
+                return path.relative(
+                  this.options.outputDir,
+                  this._writeSubgraphFile(
+                    path.join('mutations', 'schema.graphql'),
+                    schemaData,
+                    this.sourceDir,
+                    this.options.outputDir,
+                    spinner,
+                  ),
+                )
+              })
+
+              // Write the resolvers file to build/mutations/index.js
+              .updateIn(['resolvers'], resolvers => {
+                return resolvers.update('file', file => {
+                  const resolversData = fs.readFileSync(
+                    path.resolve(this.sourceDir, file),
+                    'utf-8',
+                  )
+
+                  return path.relative(
+                    this.options.outputDir,
+                    this._writeSubgraphFile(
+                      path.join('mutations', 'index.js'),
+                      resolversData,
+                      this.sourceDir,
+                      this.options.outputDir,
+                      spinner,
+                    ),
+                  )
+                })
+              }),
+          )
+        }
+
         // Write the subgraph manifest itself
         let outputFilename = path.join(this.options.outputDir, 'subgraph.yaml')
         step(spinner, 'Write subgraph manifest', this.displayPath(outputFilename))
@@ -559,6 +622,25 @@ class Compiler {
               spinner,
             ),
           })
+        }
+
+        // Upload mutations schema and resolvers if present
+        if (subgraph.get('mutations')) {
+          const filePaths = [
+            ['mutations', 'schema', 'file'],
+            ['mutations', 'resolvers', 'file'],
+          ]
+
+          for (const path of filePaths) {
+            updates.push({
+              keyPath: path,
+              value: await this._uploadFileToIPFS(
+                subgraph.getIn(path),
+                uploadedFiles,
+                spinner,
+              ),
+            })
+          }
         }
 
         // Apply all updates to the subgraph

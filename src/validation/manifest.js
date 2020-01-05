@@ -51,13 +51,98 @@ const validators = immutable.fromJS({
   ScalarTypeDefinition: (value, ctx) =>
     validators.get(ctx.getIn(['type', 'name', 'value']))(value, ctx),
 
-  UnionTypeDefinition: (value, ctx) =>
-    ctx
+  UnionTypeDefinition: (value, ctx) => {
+    // Concat path for type deduction
+    const path = ctx
+      .get('path')
+      .toJS()
+      .reduce((prev, current, index) => {
+        if (index === 0) {
+          return current
+        } else if (typeof current === 'number') {
+          return `${prev}[$]`
+        } else {
+          return `${prev}.${current}`
+        }
+      }, '')
+
+    // Deduce type of the union
+    let unionType
+
+    switch (path) {
+      case 'mutations': {
+        if (value.get('file')) {
+          unionType = 'ExternalMutations'
+        } else {
+          unionType = 'InlineMutations'
+        }
+        break
+      }
+      case 'dataSources[$]': {
+        if (!value.get('kind')) {
+          return immutable.fromJS([
+            {
+              path: [...ctx.get('path'), 'kind'],
+              message: `No value provided`,
+            },
+          ])
+        } else if (value.get('kind') === 'ethereum/contract') {
+          unionType = 'EthereumContractDataSource'
+        } else {
+          return immutable.fromJS([
+            {
+              path: [...ctx.get('path'), 'kind'],
+              message: `Datasources of kind "${value.get('kind')}" are not supported`,
+            },
+          ])
+        }
+        break
+      }
+      case 'templates[$]': {
+        if (!value.get('kind')) {
+          return immutable.fromJS([
+            {
+              path: [...ctx.get('path'), 'kind'],
+              message: `No value provided`,
+            },
+          ])
+        } else if (value.get('kind') === 'ethereum/contract') {
+          unionType = 'EthereumContractDataSourceTemplate'
+        } else {
+          return immutable.fromJS([
+            {
+              path: [...ctx.get('path'), 'kind'],
+              message: `Templates of kind "${value.get('kind')}" are not supported`,
+            },
+          ])
+        }
+        break
+      }
+      default: {
+        return immutable.fromJS([
+          {
+            path: ctx.get('path'),
+            message: `Please contact the developers. Deducer for "${path}" has not been implemented.`,
+          },
+        ])
+      }
+    }
+
+    // Verify type is present in ctx.type.types
+    const found = ctx
       .getIn(['type', 'types'])
-      .reduce(
-        (errors, type) => errors.concat(validateValue(value, ctx.set('type', type))),
-        List(),
-      ),
+      .find(type => unionType === type.getIn(['name', 'value']))
+
+    // If found set type and call validateValue, else return error
+    return found
+      ? validateValue(value, ctx.set('type', found))
+      : immutable.fromJS([
+          {
+            path: ctx.get('path'),
+            message: `Please contact the developers. "${unionType}" has been deduced, but this type is not defined.`,
+          },
+        ])
+  },
 
   NamedType: (value, ctx) =>
     validateValue(
@@ -231,8 +316,23 @@ Recommendation: Make all data sources and templates use the same network name.`,
     : List()
 }
 
+const validateMutationResolvers = value => {
+  const supportedKinds = ['javascript']
+  const resolversKind = value.mutations.resolvers.kind
+
+  return supportedKinds.includes(resolversKind)
+    ? List()
+    : immutable.fromJS([
+        {
+          path: ['mutations', 'resolvers', 'kind'],
+          message: `Mutation resolvers of kind "${resolversKind}" are not supported`,
+        },
+      ])
+}
+
 const validateManifest = (value, type, schema, { resolveFile }) => {
   // Validate manifest using the GraphQL schema that defines its structure
+
   let errors =
     value !== null && value !== undefined
       ? validateValue(
@@ -260,7 +360,14 @@ const validateManifest = (value, type, schema, { resolveFile }) => {
 
   // Validate that all data sources are for the same `network` (this includes
   // _no_ network at all)
-  return validateDataSourceNetworks(value)
+
+  errors = errors.concat(validateDataSourceNetworks(value))
+
+  if (value.mutations) {
+    errors = errors.concat(validateMutationResolvers(value))
+  }
+
+  return errors
 }
 
 module.exports = { validateManifest }

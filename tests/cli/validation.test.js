@@ -10,6 +10,206 @@ describe('Validation', () => {
     },
   )
   cliTest(
+    'Invalid subgraph manifest datasources kind',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-manifest-datasources-kind',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid subgraph manifest with datasources of kind ethereum contract',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-manifest-datasources-kind-ethereum-contract',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations manifest file',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-manifest-file',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations manifest yaml',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-manifest-yaml',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations manifest',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-manifest',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid embedded mutations manifest',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-embedded-mutations-manifest',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations resolvers file',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-resolvers-file',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations resolvers kind',
+    ['codegen', '--skip-migrations'],
+    'validation/unsupported-mutations-resolvers-kind',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutations schema',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutations-schema',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutation argument',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutation-argument',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutation return type',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutation-return-type',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Mutation return interface',
+    ['codegen', '--skip-migrations'],
+    'validation/mutation-return-interface',
+    {
+      exitCode: 0,
+    },
+  )
+  cliTest(
+    'Mutation defines new type',
+    ['codegen', '--skip-migrations'],
+    'validation/mutation-defines-new-type',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutation input type',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutation-input-type',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Invalid mutation interface type',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-mutation-interface-type',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Mutation schema missing',
+    ['codegen', '--skip-migrations'],
+    'validation/mutation-schema-missing',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Mutation interface invalid array',
+    ['codegen', '--skip-migrations'],
+    'validation/mutation-interface-invalid-array',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers no default export',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-no-default-export',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers no resolvers object',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-no-resolvers-object',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers no Mutation object',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-no-mutation-object',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers no config object',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-no-config-object',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers invalid config type',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-invalid-config-type',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers invalid config function',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-invalid-config-function',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers invalid resolvers',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-invalid-resolvers',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
+    'Resolvers not es5',
+    ['codegen', '--skip-migrations'],
+    'validation/resolvers-not-es5',
+    {
+      exitCode: 1,
+    },
+  )
+  cliTest(
     'ABI not found in data source',
     ['codegen', '--skip-migrations'],
     'validation/abi-not-found',
@@ -87,6 +287,20 @@ describe('Validation', () => {
     ['codegen', '--skip-migrations'],
     'validation/invalid-data-source-template',
     { exitCode: 1 },
+  )
+  cliTest(
+    'Invalid data source template of kind ethereum contract',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-data-source-template-kind-ethereum-contract',
+    { exitCode: 1 },
+  )
+  cliTest(
+    'Invalid data source template kind',
+    ['codegen', '--skip-migrations'],
+    'validation/invalid-data-source-template-kind',
+    {
+      exitCode: 1,
+    },
   )
   cliTest(
     'BigDecimal is a valid type',

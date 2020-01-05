@@ -1,0 +1,7 @@
+specVersion: 0.0.1
+repository: https://npmjs.com/package/gravatar-mutations
+schema:
+  file: ./schema.graphql
+resolvers:
+  kind: UnsupportedLanguage
+  file: ./index.js

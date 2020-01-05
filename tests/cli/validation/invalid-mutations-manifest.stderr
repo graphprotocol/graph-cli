@@ -1,0 +1,14 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
+
+  Path: mutations > specVersion
+  No value provided
+
+  Path: mutations > schema > file
+  File does not exist: mutations/nonexistent.graphql
+
+  Path: mutations > resolvers > kind
+  No value provided
+
+  Path: mutations > resolvers > file
+  File does not exist: mutations/dist/index.js

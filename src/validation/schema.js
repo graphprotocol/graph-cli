@@ -168,7 +168,7 @@ const fieldTargetEntityName = field => unwrapType(field.type).name.value
 const fieldTargetEntity = (defs, field) =>
   entityTypeByName(defs, fieldTargetEntityName(field))
 
-const validateInnerFieldType = (defs, def, field) => {
+const validateInnerFieldType = (defs, def, field, isMutationArg) => {
   let innerType = unwrapType(field.type)
 
   // Get the name of the type
@@ -185,7 +185,8 @@ const validateInnerFieldType = (defs, def, field) => {
         def =>
           def.kind === 'ObjectTypeDefinition' ||
           def.kind === 'EnumTypeDefinition' ||
-          def.kind === 'InterfaceTypeDefinition',
+          def.kind === 'InterfaceTypeDefinition' ||
+          (isMutationArg && def.kind === 'InputObjectTypeDefinition'),
       )
       .map(def => def.name.value),
   )
@@ -322,13 +323,44 @@ const validateEntityFields = (defs, def) =>
     List(),
   )
 
+const validateMutationArguments = (defs, field) =>
+  field.arguments.reduce(
+    (errors, argument) =>
+      errors.concat(validateInnerFieldType(defs, field, argument, true)),
+    List(),
+  )
+
+const validateMutationReturnType = (defs, field) =>
+  validateInnerFieldType(defs, field, field)
+
+const validateMutations = (defs, def) =>
+  def.fields.reduce(
+    (errors, field) =>
+      errors
+        .concat(validateMutationArguments(defs, field))
+        .concat(validateMutationReturnType(defs, field)),
+    List(),
+  )
+
+const validateFields = (defs, def) =>
+  def.fields.reduce(
+    (errors, field) => errors.concat(validateInnerFieldType(defs, def, field)),
+    List(),
+  )
+
 const typeDefinitionValidators = {
   ObjectTypeDefinition: (defs, def) =>
-    List.of(
-      ...validateEntityDirective(def),
-      ...validateEntityID(def),
-      ...validateEntityFields(defs, def),
-    ),
+    def.name.value === 'Mutation'
+      ? validateMutations(defs, def)
+      : List.of(
+          ...validateEntityDirective(def),
+          ...validateEntityID(def),
+          ...validateEntityFields(defs, def),
+        ),
+
+  InputObjectTypeDefinition: (defs, def) => validateFields(defs, def),
+
+  InterfaceTypeDefinition: (defs, def) => validateFields(defs, def),
 }
 
 const validateTypeDefinition = (defs, def) =>
@@ -339,9 +371,64 @@ const validateTypeDefinition = (defs, def) =>
 const validateTypeDefinitions = defs =>
   defs.reduce((errors, def) => errors.concat(validateTypeDefinition(defs, def)), List())
 
-const validateSchema = filename => {
-  let doc = loadSchema(filename)
-  let schema = parseSchema(doc)
+const validateNoOtherTypesExceptMutation = defs =>
+  defs.reduce(
+    (errors, def) =>
+      def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Mutation'
+        ? errors.concat(
+            immutable.fromJS([
+              {
+                loc: def.loc,
+                entity: def.name.value,
+                message:`\
+Encountered object type '${def.name.value}'. 'Mutation' is the only \
+object type allowed in the mutation schema. \
+\
+For mutation arguments, use 'input' types. For return values, use either \
+entity types from the subgraph schema or 'interface' types.`,
+              },
+            ]),
+          )
+        : errors,
+    List(),
+  )
+
+const validateMutationTypeExists = defs =>
+  defs.findIndex(def => def.name.value === 'Mutation') === -1
+    ? immutable.fromJS([
+        {
+          loc: null,
+          entity: 'Mutation',
+          message: 'Mutation type not found',
+        },
+      ])
+    : List()
+
+const validateMutationsSchema = defs =>
+  List.of(
+    ...validateNoOtherTypesExceptMutation(defs),
+    ...validateMutationTypeExists(defs),
+  )
+
+const validateSchema = (rootFile, mutationsFile) => {
+  let schemaDoc = loadSchema(rootFile)
+
+  // If the mutation schema is provided, concatenate it
+  // to the end of the root schema, and validate it seperately
+  if (mutationsFile) {
+    // Parse the mutations schema and ensure it doesn't
+    // contain new type definitions that aren't the Mutation
+    let mutationsDoc = loadSchema(mutationsFile)
+    let mutationsSchema = parseSchema(mutationsDoc)
+    schemaDoc += `\n${mutationsDoc}`
+
+    let errors = validateMutationsSchema(mutationsSchema.definitions)
+    if (errors.size > 0) {
+      return errors
+    }
+  }
+
+  let schema = parseSchema(schemaDoc)
   return validateTypeDefinitions(schema.definitions)
 }
 

@@ -75,7 +75,7 @@ module.exports = {
     client.request('subgraph_create', { name: subgraphName }, function(
       requestError,
       jsonRpcError,
-      res
+      res,
     ) {
       if (jsonRpcError) {
         spinner.fail(`Error creating the subgraph: ${jsonRpcError.message}`)

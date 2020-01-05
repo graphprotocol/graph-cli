@@ -1,0 +1,24 @@
+- Load subgraph from subgraph.yaml
+✖ Failed to load subgraph from subgraph.yaml: Error in subgraph.yaml:
+
+  Path: templates > 0 > name
+  Expected string, found number:
+  5
+
+  Path: templates > 0 > source
+  Unexpected key in map: address
+
+  Path: templates > 0 > mapping > entities
+  No value provided
+
+  Path: templates > 0 > mapping > abis > 0 > file
+  File does not exist: NonexistentAbi.json
+
+  Path: templates > 0 > mapping > language
+  No value provided
+
+  Path: templates > 0 > mapping > file
+  No value provided
+
+  Path: templates > 0 > mapping > apiVersion
+  No value provided

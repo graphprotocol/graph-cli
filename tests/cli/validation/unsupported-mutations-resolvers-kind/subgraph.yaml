@@ -1,0 +1,26 @@
+specVersion: 0.0.2
+description: Gravatar for Ethereum
+repository: https://github.com/graphprotocol/example-subgraph
+schema:
+  file: ./schema.graphql
+mutations:
+  file: ./mutations/mutations.yaml
+dataSources:
+  - kind: ethereum/contract
+    name: ExampleSubgraph
+    source:
+      address: "22843e74c59580b3eaf6c233fa67d8b7c561a835"
+      abi: ExampleContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.1
+      language: wasm/assemblyscript
+      file: ./mapping.ts
+      entities:
+        - ExampleEntity
+      abis:
+        - name: ExampleContract
+          file: ./Abi.json
+      callHandlers:
+        - function: doSomething(uint256)
+          handler: handleDoSomething
