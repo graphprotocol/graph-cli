@@ -24,21 +24,22 @@ ${chalk.dim('Options:')}
 
 ${chalk.dim('Choose mode with one of:')}
 
-      --from-contract <address> Creates a scaffold based on an existing contract
+      --from-contract <address> Creates a scaffold based on an existing contracts. Accepts comma separated contract addresses.
       --from-example            Creates a scaffold based on an example subgraph
 
 ${chalk.dim('Options for --from-contract:')}
 
-      --abi <path>              Path to the contract ABI (default: download from Etherscan)
+      --abi <path>              Path to the contract ABI (default: download from Etherscan). Accepts comma separated ABI file path.
       --network <mainnet|kovan|rinkeby|ropsten|goerli|poa-core>
                                 Selects the network the contract is deployed to
       --index-events            Index contract events as entities
-      --contract-name           Name of the contract (default: Contract)      
+      --contract-name           Name of the contract (default: Contract). Accepts comma separated contract names.
+      --etherscan-apikey        Etherscan API key. Default etherscan rate limit is 1 transaction per 3 sec. API key will increase ratelimt. 
 `
 
 const processInitForm = async (
   toolbox,
-  {abi, address, allowSimpleName, directory, fromExample, network, subgraphName, contractName},
+  {abis, addresses, allowSimpleName, directory, fromExample, network, subgraphName, contractNames, etherscanApikey},
 ) => {
   let networkChoices = ['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'poa-core']
   let addressPattern = /^(0x)?[0-9a-fA-F]{40}$/
@@ -94,35 +95,39 @@ const processInitForm = async (
     },
     {
       type: 'input',
-      name: 'address',
-      message: 'Contract address',
+      name: 'addresses',
+      message: 'Comma separated Contract addresses',
       skip: fromExample !== undefined,
-      initial: address,
+      initial: addresses,
       validate: async value => {
         if (fromExample !== undefined) {
           return true
         }
 
-        // Validate whether the address is valid
-        if (!addressPattern.test(value)) {
-          return `Contract address "${value}" is invalid.
-  Must be 40 hexadecimal characters, with an optional '0x' prefix.`
-        }
+        const contractList = value.split(",").map(v => v.trim());
 
+        // Validate whether the address is valid
+        for(let p=0; p<contractList.length; p++) {
+          if (!addressPattern.test(contractList[p])) {
+            return `Contract address "${contractList[p]}" is invalid.
+    Must be 40 hexadecimal characters, with an optional '0x' prefix.`
+          } 
+        }
         return true
       },
       result: async value => {
         if (fromExample !== undefined) {
           return value
         }
-
+        value = value.split(",").map(v => v.trim());
+        
         // Try loading the ABI from Etherscan, if none was provided
-        if (!abi) {
+        if (!abis) {
           try {
             if (network === 'poa-core') {
-              abiFromBlockScout = await loadAbiFromBlockScout(network, value)
+              abiFromBlockScout = await Promise.all(value.map((c) => loadAbiFromBlockScout(network, c)))
             } else {
-              abiFromEtherscan = await loadAbiFromEtherscan(network, value)
+              abiFromEtherscan = await Promise.all(value.map((c) => loadAbiFromEtherscan(network, c, etherscanApikey)))
             }
           } catch (e) {}
         }
@@ -131,9 +136,9 @@ const processInitForm = async (
     },
     {
       type: 'input',
-      name: 'abi',
-      message: 'ABI file (path)',
-      initial: abi,
+      name: 'abis',
+      message: 'Comma separated ABI file (path),',
+      initial: abis,
       skip: () => fromExample !== undefined || abiFromEtherscan !== undefined,
       validate: async value => {
         if (fromExample || abiFromEtherscan) {
@@ -141,7 +146,8 @@ const processInitForm = async (
         }
 
         try {
-          abiFromFile = await loadAbiFromFile(value)
+          abiFromFile = await Promise.all(value.split(",").map((abi) => loadAbiFromFile(abi.trim())));
+          //abiFromFile = await loadAbiFromFile(value)
           return true
         } catch (e) {
           return e.message
@@ -150,21 +156,23 @@ const processInitForm = async (
     },
     {
       type: 'input',
-      name: 'contractName',
-      message: 'Contract Name',
-      initial: contractName || 'Contract',
+      name: 'contractNames',
+      message: 'Comma separated contract names',
+      initial: contractNames || 'Contract',
       skip: () => fromExample !== undefined,
       validate: value => value && value.length > 0,
       result: value => {
-        contractName = value;
-        return value;
+
+
+        contractNames = value.split(",").map((v) => v.trim());
+        return contractNames;
       }
     },
   ]
 
   try {
     let answers = await toolbox.prompt.ask(questions)
-    return { ...answers, abi: abiFromEtherscan || abiFromFile }
+    return { ...answers, abis: abiFromEtherscan || abiFromFile }
   } catch (e) {
     return undefined
   }
@@ -194,7 +202,7 @@ const loadAbiFromBlockScout = async (network, address) =>
     },
   )
 
-const loadAbiFromEtherscan = async (network, address) =>
+const loadAbiFromEtherscan = async (network, address, etherscanApikey) =>
   await withSpinner(
     `Fetching ABI from Etherscan`,
     `Failed to fetch ABI from Etherscan`,
@@ -203,7 +211,7 @@ const loadAbiFromEtherscan = async (network, address) =>
       let result = await fetch(
         `https://${
           network === 'mainnet' ? 'api' : `api-${network}`
-        }.etherscan.io/api?module=contract&action=getabi&address=${address}`,
+        }.etherscan.io/api?module=contract&action=getabi&address=${address}${etherscanApikey?'&apikey='+etherscanApikey:''}`,
       )
       let json = await result.json()
 
@@ -252,9 +260,14 @@ module.exports = {
       help,
       indexEvents,
       network,
+      etherscanApikey
     } = toolbox.parameters.options
 
-    if (fromContract && fromExample) {
+    let abis = abi && abi.split(",").map((a) => a.trim());
+    let contractNames = contractName && contractName.split(",").map((c) => c.trim());
+    let fromContracts = fromContract && fromContract.split(",").map((fc) => fc.trim())
+
+    if (fromContracts && fromExample) {
       print.error(`Only one of --from-example and --from-contract can be used at a time.`)
       process.exitCode = 1
       return
@@ -320,10 +333,10 @@ module.exports = {
 
     // If all parameters are provided from the command-line,
     // go straight to creating the subgraph from an existing contract
-    if (fromContract && subgraphName && directory && network) {
-      if (abi) {
+    if (fromContracts && subgraphName && directory && network) {
+      if (abis) {
         try {
-          abi = await loadAbiFromFile(abi)
+          abis = await Promise.all(abis.map((abi) => loadAbiFromFile(abi)));
         } catch (e) {
           print.error(`Failed to load ABI: ${e.message}`)
           process.exitCode = 1
@@ -332,9 +345,10 @@ module.exports = {
       } else {
         try {
           if (network === 'poa-core') {
-            abi = await loadAbiFromBlockScout(network, fromContract)
+
+            abis = await Promise.all(fromContracts.map((c) => loadAbiFromBlockScout(network, c)))
           } else {
-            abi = await loadAbiFromEtherscan(network, fromContract)
+            abis = await Promise.all(fromContracts.map((c) => loadAbiFromEtherscan(network, c, etherscanApikey)))
           }
         } catch (e) {
           process.exitCode = 1
@@ -345,14 +359,15 @@ module.exports = {
       return await initSubgraphFromContract(
         toolbox,
         {
-          abi,
+          abis,
           allowSimpleName,
           directory,
-          address: fromContract,
+          addresses: fromContracts,
           indexEvents,
           network,
           subgraphName,
-          contractName,
+          contractNames,
+          etherscanApikey,
         },
         { commands },
       )
@@ -360,14 +375,15 @@ module.exports = {
 
     // Otherwise, take the user through the interactive form
     let inputs = await processInitForm(toolbox, {
-      abi,
+      abis,
       allowSimpleName,
       directory,
-      address: fromContract,
+      addresses: fromContract,
       fromExample,
       network,
       subgraphName,
-      contractName
+      contractNames,
+      etherscanApikey
     })
 
     // Exit immediately when the form is cancelled
@@ -394,11 +410,12 @@ module.exports = {
           allowSimpleName,
           subgraphName: inputs.subgraphName,
           directory: inputs.directory,
-          abi: inputs.abi,
+          abis: inputs.abis,
           network: inputs.network,
-          address: inputs.address,
+          addresses: inputs.addresses,
           indexEvents,
-          contractName: inputs.contractName
+          contractNames: inputs.contractNames,
+          etherscanApikey,
         },
         { commands },
       )
@@ -588,10 +605,19 @@ const initSubgraphFromExample = async (
 
 const initSubgraphFromContract = async (
   toolbox,
-  {allowSimpleName, subgraphName, directory, abi, network, address, indexEvents, contractName},
+  {allowSimpleName, subgraphName, directory, abis, network, addresses, indexEvents, contractNames=["Contract"], etherscanApikey},
   { commands },
 ) => {
   let { print } = toolbox
+
+  if(abis.length !== addresses.length || abis.length !== contractNames.length){
+    print.error(`Number of ABIs, contract addresses and contract names must be same.`);
+    print.error(`Number of ABIs is ${abis.length}`)
+    print.error(`Number of contract addresses ${addresses.length}`);
+    print.error(`Number of contractNames is ${contractNames.length}`);
+    process.exitCode = 1
+    return
+  }
 
   // Fail if the subgraph name is invalid
   if (!revalidateSubgraphName(toolbox, subgraphName, { allowSimpleName })) {
@@ -606,11 +632,13 @@ const initSubgraphFromContract = async (
     return
   }
 
-  if (abiEvents(abi).length === 0) {
-    // Fail if the ABI does not contain any events
-    print.error(`ABI does not contain any events`)
-    process.exitCode = 1
-    return
+  for(let i=0; i< abis.length; i++){
+    if (abiEvents(abis[i]).length === 0) {
+      // Fail if the ABI does not contain any events
+      print.error(`ABI does not contain any events`)
+      process.exitCode = 1
+      return
+    }
   }
 
   // Scaffold subgraph from ABI
@@ -622,11 +650,12 @@ const initSubgraphFromContract = async (
       let scaffold = await generateScaffold(
         {
           subgraphName,
-          abi,
+          abis,
           network,
-          address,
+          addresses,
           indexEvents,
-          contractName,
+          contractNames,
+          etherscanApikey
         },
         spinner,
       )

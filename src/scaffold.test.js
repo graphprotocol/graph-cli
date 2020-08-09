@@ -77,10 +77,10 @@ describe('Subgraph scaffolding', () => {
   test('Manifest', () => {
     expect(
       generateManifest({
-        abi: TEST_ABI,
+        abis: [TEST_ABI],
         network: 'kovan',
-        address: '0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d',
-        contractName: 'Contract'
+        addresses: ['0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d'],
+        contractNames: ['Contract']
       }),
     ).toEqual(`\
 specVersion: 0.0.1
@@ -108,12 +108,12 @@ dataSources:
           handler: handleExampleEvent
         - event: ExampleEvent(bytes32)
           handler: handleExampleEvent1
-      file: ./src/mapping.ts
+      file: ./src/ContractMapping.ts
 `)
   })
 
   test('Schema (default)', () => {
-    expect(generateSchema({ abi: TEST_ABI })).toEqual(`\
+    expect(generateSchema({ abis: [TEST_ABI] })).toEqual(`\
 type ExampleEntity @entity {
   id: ID!
   count: BigInt!
@@ -124,7 +124,7 @@ type ExampleEntity @entity {
   })
 
   test('Schema (for indexing events)', () => {
-    expect(generateSchema({ abi: TEST_ABI, indexEvents: true })).toEqual(`\
+    expect(generateSchema({ abis: [TEST_ABI], indexEvents: true })).toEqual(`\
 type ExampleEvent @entity {
   id: ID!
   a: BigInt! # uint256
