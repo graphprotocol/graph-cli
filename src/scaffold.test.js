@@ -1,11 +1,6 @@
 const ABI = require('./abi')
 const immutable = require('immutable')
-const {
-  generateEventFieldAssignments,
-  generateManifest,
-  generateMapping,
-  generateSchema,
-} = require('./scaffold')
+const { generateManifest, generateMapping, generateSchema } = require('./scaffold')
 
 const TEST_EVENT = {
   name: 'ExampleEvent',
@@ -80,7 +75,7 @@ describe('Subgraph scaffolding', () => {
         abi: TEST_ABI,
         network: 'kovan',
         address: '0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d',
-        contractName: 'Contract'
+        contractName: 'Contract',
       }),
     ).toEqual(`\
 specVersion: 0.0.1
@@ -204,7 +199,9 @@ export function handleExampleEvent1(event: ExampleEvent1): void {}
   })
 
   test('Mapping (for indexing events)', () => {
-    expect(generateMapping({ abi: TEST_ABI, indexEvents: true, contractName: 'Contract' })).toEqual(`\
+    expect(
+      generateMapping({ abi: TEST_ABI, indexEvents: true, contractName: 'Contract' }),
+    ).toEqual(`\
 import {
   ExampleEvent as ExampleEventEvent,
   ExampleEvent1 as ExampleEvent1Event

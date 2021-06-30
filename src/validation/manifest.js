@@ -67,7 +67,10 @@ const validators = immutable.fromJS({
 
   NonNullType: (value, ctx) =>
     value !== null && value !== undefined
-      ? validateValue(value, ctx.update('type', type => type.get('type')))
+      ? validateValue(
+          value,
+          ctx.update('type', type => type.get('type')),
+        )
       : immutable.fromJS([
           {
             path: ctx.get('path'),

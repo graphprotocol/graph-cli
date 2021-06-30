@@ -491,7 +491,7 @@ const collectGraphNodeLogs = async (tempdir, standaloneNode, nodeOutputChunks) =
       follow: false,
       cwd: path.join(tempdir, 'compose'),
     })
-    return stripAnsi(logs.out.trim()).replace(/graph-node_1  \| /g, '')
+    return stripAnsi(logs.out.trim()).replace(/graph-node_1 {2}\| /g, '')
   }
 }
 
@@ -500,7 +500,7 @@ const collectEthereumLogs = async tempdir => {
     follow: false,
     cwd: path.join(tempdir, 'compose'),
   })
-  return stripAnsi(logs.out.trim()).replace(/ethereum_1  \| /g, '')
+  return stripAnsi(logs.out.trim()).replace(/ethereum_1 {2}\| /g, '')
 }
 
 const runTests = async testCommand =>

@@ -31,8 +31,10 @@
     "graph": "bin/graph"
   },
   "devDependencies": {
-    "eslint": "^6.0.1",
+    "babel-eslint": "^10.1.0",
+    "eslint": "7.12.1",
     "jest": "^26.0.0",
+    "prettier": "2.1.2",
     "spawn-command": "^0.0.2-1",
     "strip-ansi": "^6.0.0",
     "tern": "^0.24.0"
@@ -41,6 +43,9 @@
     "test": "jest --verbose",
     "test:init": "jest tests/cli/init.test.js --verbose",
     "test:validation": "jest tests/cli/validation.test.js --verbose",
+    "format": "./node_modules/.bin/prettier --write src/*.js src/**/*.js src/**/**/*.js",
+    "lint": "./node_modules/.bin/eslint . --ext .js",
+    "prepare": "yarn format && yarn lint",
     "release:patch": "npm version patch && npm publish && git push origin master && git push --tags",
     "release:minor": "npm version minor && npm publish && git push origin master && git push --tags"
   }

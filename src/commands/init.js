@@ -38,7 +38,16 @@ ${chalk.dim('Options for --from-contract:')}
 
 const processInitForm = async (
   toolbox,
-  {abi, address, allowSimpleName, directory, fromExample, network, subgraphName, contractName},
+  {
+    abi,
+    address,
+    allowSimpleName,
+    directory,
+    fromExample,
+    network,
+    subgraphName,
+    contractName,
+  },
 ) => {
   let networkChoices = [
     'mainnet',
@@ -171,9 +180,9 @@ const processInitForm = async (
       skip: () => fromExample !== undefined,
       validate: value => value && value.length > 0,
       result: value => {
-        contractName = value;
-        return value;
-      }
+        contractName = value
+        return value
+      },
     },
   ]
 
@@ -192,9 +201,10 @@ const loadAbiFromBlockScout = async (network, address) =>
     `Warnings while fetching ABI from BlockScout`,
     async spinner => {
       let result = await fetch(
-        `https://blockscout.com/${
-          network.replace('-', '/')
-        }/api?module=contract&action=getabi&address=${address}`,
+        `https://blockscout.com/${network.replace(
+          '-',
+          '/',
+        )}/api?module=contract&action=getabi&address=${address}`,
       )
       let json = await result.json()
 
@@ -277,7 +287,7 @@ module.exports = {
 
     let subgraphName, directory
     try {
-      ;[subgraphName, directory] = fixParameters(toolbox.parameters, {
+      [subgraphName, directory] = fixParameters(toolbox.parameters, {
         fromExample,
         allowSimpleName,
         help,
@@ -382,7 +392,7 @@ module.exports = {
       fromExample,
       network,
       subgraphName,
-      contractName
+      contractName,
     })
 
     // Exit immediately when the form is cancelled
@@ -412,7 +422,7 @@ module.exports = {
           network: inputs.network,
           address: inputs.address,
           indexEvents,
-          contractName: inputs.contractName
+          contractName: inputs.contractName,
         },
         { commands },
       )
@@ -602,7 +612,16 @@ const initSubgraphFromExample = async (
 
 const initSubgraphFromContract = async (
   toolbox,
-  {allowSimpleName, subgraphName, directory, abi, network, address, indexEvents, contractName},
+  {
+    allowSimpleName,
+    subgraphName,
+    directory,
+    abi,
+    network,
+    address,
+    indexEvents,
+    contractName,
+  },
   { commands },
 ) => {
   let { print } = toolbox

@@ -1,10 +1,20 @@
 {
+  "parser": "babel-eslint",
   "parserOptions": {
-    "ecmaVersion": 2017,
+    "ecmaVersion": 2020,
+    "sourceType": "module",
     "ecmaFeatures": {
+      "modules": true,
+      "experimentalObjectRestSpread": true
     }
   },
-  "env": {
-    "node": true
+  "extends": ["eslint:recommended"],
+  "rules": {
+    "comma-dangle": 0,
+    "no-console": 1,
+    "no-unused-vars": "warn",
+    "no-undef": "warn",
+    "no-empty": "warn",
+    "no-unexpected-multiline": "warn"
   }
 }

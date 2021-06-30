@@ -64,7 +64,10 @@ describe('Codegen utilities', () => {
         value: {
           type: 'tuple',
           name: 'value',
-          components: [{ name: 'a', type: 'string' }, { name: 'b', type: 'uint256' }],
+          components: [
+            { name: 'a', type: 'string' },
+            { name: 'b', type: 'uint256' },
+          ],
         },
         path: ['value'],
         index: 0,

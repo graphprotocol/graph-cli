@@ -76,7 +76,7 @@ module.exports = {
     client.request('subgraph_remove', { name: subgraphName }, function(
       requestError,
       jsonRpcError,
-      res
+      res,
     ) {
       if (jsonRpcError) {
         spinner.fail(`Error removing the subgraph: ${jsonRpcError.message}`)

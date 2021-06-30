@@ -271,11 +271,7 @@ class Compiler {
       let outputFile = path.relative(baseDir, outFile)
 
       // Create output directory
-      try {
-        fs.mkdirsSync(path.dirname(outFile))
-      } catch (e) {
-        throw e
-      }
+      fs.mkdirsSync(path.dirname(outFile))
 
       let libs = this.libsDirs.join(',')
       let global = path.relative(baseDir, this.globalsFile)
@@ -353,11 +349,7 @@ class Compiler {
       let outputFile = path.relative(baseDir, outFile)
 
       // Create output directory
-      try {
-        fs.mkdirsSync(path.dirname(outFile))
-      } catch (e) {
-        throw e
-      }
+      fs.mkdirsSync(path.dirname(outFile))
 
       let libs = this.libsDirs.join(',')
       let global = path.relative(baseDir, this.globalsFile)

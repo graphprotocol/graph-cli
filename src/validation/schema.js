@@ -221,7 +221,8 @@ const entityTypeByName = (defs, name) =>
     .filter(
       def =>
         def.kind === 'InterfaceTypeDefinition' ||
-        (def.kind === 'ObjectTypeDefinition' && def.directives.find(directive => directive.name.value === 'entity'))
+        (def.kind === 'ObjectTypeDefinition' &&
+          def.directives.find(directive => directive.name.value === 'entity')),
     )
     .find(def => def.name.value === name)
 
@@ -341,7 +342,11 @@ does not exist on type '${targetEntity.name.value}'`,
 
   // The field we are deriving from must either have type 'def' or one of the
   // interface types that 'def' is implementing
-  if (!backRefEntity || (backRefEntity.name.value !== def.name.value && !def.interfaces.find(intf => intf.name.value === backRefEntity.name.value))) {
+  if (
+    !backRefEntity ||
+    (backRefEntity.name.value !== def.name.value &&
+      !def.interfaces.find(intf => intf.name.value === backRefEntity.name.value))
+  ) {
     return immutable.fromJS([
       {
         loc: directive.loc,

@@ -2,8 +2,6 @@ const fs = require('fs-extra')
 const immutable = require('immutable')
 const path = require('path')
 const prettier = require('prettier')
-const graphql = require('graphql/language')
-const chalk = require('chalk')
 const toolbox = require('gluegun/toolbox')
 
 const ABI = require('./abi')

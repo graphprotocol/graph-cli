@@ -22,7 +22,7 @@ const cliTest = (title, args, testPath, options) => {
       let expectedStdout = undefined
       try {
         expectedStdout = fs.readFileSync(resolvePath(`./${testPath}.stdout`), 'utf-8')
-      } catch (e) {}
+      } catch (e) { }
 
       let expectedStderr = undefined
       try {
