@@ -8,6 +8,10 @@ const ABI = require('../abi')
 module.exports = class AbiCodeGenerator {
   constructor(abi) {
     this.abi = abi
+    this.name = abi.name
+      .split('/')
+      .reverse()
+      .shift()
   }
 
   generateModuleImports() {
@@ -317,7 +321,7 @@ module.exports = class AbiCodeGenerator {
   }
 
   _generateSmartContractClass() {
-    let klass = tsCodegen.klass(this.abi.name, {
+    let klass = tsCodegen.klass(this.name, {
       export: true,
       extends: 'ethereum.SmartContract',
     })
@@ -329,9 +333,9 @@ module.exports = class AbiCodeGenerator {
         immutable.List([
           tsCodegen.param('address', typesCodegen.ascTypeForEthereum('address')),
         ]),
-        tsCodegen.namedType(this.abi.name),
+        tsCodegen.namedType(this.name),
         `
-        return new ${this.abi.name}('${this.abi.name}', address);
+        return new ${this.name}('${this.name}', address);
         `,
       ),
     )
@@ -354,7 +358,7 @@ module.exports = class AbiCodeGenerator {
       // Generate a type for the result of calling the function
       let returnType = undefined
       let simpleReturnType = true
-      let tupleResultParentType = this.abi.name + '__' + fnAlias + 'Result'
+      let tupleResultParentType = this.name + '__' + fnAlias + 'Result'
 
       // Disambiguate outputs with duplicate names
       let outputs = util.disambiguateNames({
@@ -367,7 +371,7 @@ module.exports = class AbiCodeGenerator {
         simpleReturnType = false
 
         // Create a type dedicated to holding the return values
-        returnType = tsCodegen.klass(this.abi.name + '__' + fnAlias + 'Result', {
+        returnType = tsCodegen.klass(this.name + '__' + fnAlias + 'Result', {
           export: true,
         })
 
@@ -429,7 +433,7 @@ module.exports = class AbiCodeGenerator {
                 index,
                 tupleResultParentType,
                 'function',
-                this.abi.name,
+                this.name,
               ).classes,
             )
           }
@@ -448,7 +452,7 @@ module.exports = class AbiCodeGenerator {
             0,
             tupleResultParentType,
             'function',
-            this.abi.name,
+            this.name,
           )
           types = types.concat(tuple.classes)
           returnType = util.isTupleType(type)
@@ -467,7 +471,7 @@ module.exports = class AbiCodeGenerator {
       })
 
       // Generate a type prefix to identify the Tuple inputs to a function
-      let tupleInputParentType = this.abi.name + '__' + fnAlias + 'Input'
+      let tupleInputParentType = this.name + '__' + fnAlias + 'Input'
 
       // Create types for Tuple inputs
       inputs.forEach((input, index) => {
@@ -478,7 +482,7 @@ module.exports = class AbiCodeGenerator {
               index,
               tupleInputParentType,
               'function',
-              this.abi.name,
+              this.name,
             ).classes,
           )
         }
@@ -529,12 +533,7 @@ module.exports = class AbiCodeGenerator {
               isTry ? 'value[0]' : 'result[0]',
               outputs.get(0).get('type'),
               util.isTupleArrayType(outputs.get(0).get('type'))
-                ? this._tupleTypeName(
-                    outputs.get(0),
-                    0,
-                    tupleResultParentType,
-                    this.abi.name,
-                  )
+                ? this._tupleTypeName(outputs.get(0), 0, tupleResultParentType, this.name)
                 : '',
             )
           : `new ${returnType.name}(
@@ -549,7 +548,7 @@ module.exports = class AbiCodeGenerator {
                               output,
                               index,
                               tupleResultParentType,
-                              this.abi.name,
+                              this.name,
                             )
                           : '',
                       )} ${
@@ -559,7 +558,7 @@ module.exports = class AbiCodeGenerator {
                               output,
                               index,
                               tupleResultParentType,
-                              this.abi.name,
+                              this.name,
                             )
                           : ''
                       }`,
@@ -588,14 +587,9 @@ module.exports = class AbiCodeGenerator {
   _getTupleParamType(inputOrOutput, index, tupleParentType) {
     const type = inputOrOutput.get('type')
     return util.isTupleType(type)
-      ? this._tupleTypeName(inputOrOutput, index, tupleParentType, this.abi.name)
+      ? this._tupleTypeName(inputOrOutput, index, tupleParentType, this.name)
       : util.isTupleArrayType(type)
-      ? `Array<${this._tupleTypeName(
-          inputOrOutput,
-          index,
-          tupleParentType,
-          this.abi.name,
-        )}>`
+      ? `Array<${this._tupleTypeName(inputOrOutput, index, tupleParentType, this.name)}>`
       : typesCodegen.ascTypeForEthereum(type)
   }
 

@@ -22,8 +22,15 @@ module.exports = class DataSourceTemplateCodeGenerator {
 
   _generateTemplateType() {
     let name = this.template.get('name')
+    let base = name
+      .split('/')
+      .reverse()
+      .shift()
 
-    let klass = tsCodegen.klass(name, { export: true, extends: 'DataSourceTemplate' })
+    let klass = tsCodegen.klass(base, {
+      export: true,
+      extends: 'DataSourceTemplate',
+    })
     klass.addMethod(this._generateCreateMethod())
     klass.addMethod(this._generateCreateWithContextMethod())
     return klass
