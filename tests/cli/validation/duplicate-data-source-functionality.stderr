@@ -1,0 +1,36 @@
+- Load subgraph from subgraph.yaml
+⚠ Warnings while loading subgraph from subgraph.yaml: Warnings in subgraph.yaml:
+
+    Path: dataSources > 1
+    This data source, 'ExampleSubgraph1', has identical source and mapping to an already declared data source.
+    They will both listen to the same triggers, process them with the same mappings, and generate the same entity updates.
+
+✔ Load subgraph from subgraph.yaml
+- Load contract ABIs
+  Load contract ABI from Abi.json
+- Load contract ABIs
+  Load contract ABI from Abi.json
+- Load contract ABIs
+✔ Load contract ABIs
+- Generate types for contract ABIs
+  Generate types for contract ABI: ExampleContract (Abi.json)
+- Generate types for contract ABIs
+  Write types to generated/ExampleSubgraph/ExampleContract.ts
+- Generate types for contract ABIs
+  Generate types for contract ABI: ExampleContract (Abi.json)
+- Generate types for contract ABIs
+  Write types to generated/ExampleSubgraph1/ExampleContract.ts
+- Generate types for contract ABIs
+✔ Generate types for contract ABIs
+- Generate types for data source templates
+✔ Generate types for data source templates
+- Load data source template ABIs
+✔ Load data source template ABIs
+- Generate types for data source template ABIs
+✔ Generate types for data source template ABIs
+- Load GraphQL schema from schema.graphql
+✔ Load GraphQL schema from schema.graphql
+- Generate types for GraphQL schema
+  Write types to generated/schema.ts
+- Generate types for GraphQL schema
+✔ Generate types for GraphQL schema

@@ -163,6 +163,15 @@ describe('Validation', () => {
   )
 
   cliTest(
+    'Duplicate data source functionality',
+    ['codegen', '--skip-migrations'],
+    'validation/duplicate-data-source-functionality',
+    {
+      exitCode: 0,
+    },
+  )
+
+  cliTest(
     'Duplicate template name',
     ['codegen', '--skip-migrations'],
     'validation/duplicate-template-name',

@@ -391,6 +391,29 @@ More than one data source named '${name}', data source names must be unique.`,
     }, immutable.List())
   }
 
+  static validateUniqueDataSources(manifest) {
+    let data_source_identifiers = immutable.List()
+    return manifest.get('dataSources').reduce((errors, dataSource, dataSourceIndex) => {
+      let path = ['dataSources', dataSourceIndex]
+      let data_source_identifier = dataSource.get('source').merge(dataSource.get('mapping'))
+      if (data_source_identifiers.includes(data_source_identifier)) {
+        console.log("duplicate")
+        errors = errors.push(
+          immutable.fromJS({
+            path,
+            message: `\
+This data source, '${dataSource.get('name')}', has identical source and mapping to an already declared data source.
+They will both listen to the same triggers, process them with the same mappings, and generate the same entity updates.`,
+          }),
+        )
+      }
+
+      data_source_identifiers = data_source_identifiers.push(data_source_identifier)
+      return errors
+    }, immutable.List())
+  }
+
+
   static validateUniqueTemplateNames(manifest) {
     let names = []
     return manifest
@@ -467,7 +490,7 @@ More than one template named '${name}', template names must be unique.`,
       : immutable.List.of(
           ...Subgraph.validateRepository(manifest, { resolveFile }),
           ...Subgraph.validateDescription(manifest, { resolveFile }),
-          ...Subgraph.validateEthereumContractHandlers(manifest),
+          ...Subgraph.validateUniqueDataSource(manifest),
         )
 
     return {
