@@ -4,7 +4,7 @@
   "description": "CLI for building for and deploying to The Graph",
   "dependencies": {
     "assemblyscript": "git+https://github.com/AssemblyScript/assemblyscript.git#v0.6",
-    "chalk": "^3.0.0",
+    "chalk": "^4.1.1",
     "chokidar": "^3.0.2",
     "debug": "^4.1.1",
     "docker-compose": "^0.23.2",
