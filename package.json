@@ -14,7 +14,7 @@
     "gluegun": "^4.3.1",
     "graphql": "^15.5.0",
     "immutable": "^3.8.2",
-    "ipfs-http-client": "^34.0.0",
+    "ipfs-http-client": "^50.1.2",
     "jayson": "^3.0.2",
     "js-yaml": "^3.13.1",
     "node-fetch": "^2.3.0",
