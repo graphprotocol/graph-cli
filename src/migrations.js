@@ -4,6 +4,7 @@ const MIGRATIONS = [
   require('./migrations/mapping_api_version_0_0_1'),
   require('./migrations/mapping_api_version_0_0_2'),
   require('./migrations/mapping_api_version_0_0_3'),
+  require('./migrations/mapping_api_version_0_0_4'),
   require('./migrations/spec_version_0_0_2'),
 ]
 

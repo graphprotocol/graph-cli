@@ -40,8 +40,8 @@ const generatePackageJson = ({ subgraphName, node }) =>
           subgraphName,
       },
       dependencies: {
-        '@graphprotocol/graph-cli': `${module.exports.version}`,
-        '@graphprotocol/graph-ts': `0.20.0`,
+        '@graphprotocol/graph-cli': `https://github.com/graphprotocol/graph-cli#otavio/update-assembly-script`,
+        '@graphprotocol/graph-ts': `https://github.com/graphprotocol/graph-ts#otavio/update-assembly-script`,
       },
     }),
     { parser: 'json' },
@@ -225,7 +225,7 @@ const generatePlaceholderHandlers = ({ abi, events, contractName }) =>
 
       // Entities only exist after they have been saved to the store;
       // \`null\` checks allow to create entities on demand
-      if (entity == null) {
+      if (!entity) {
         entity = new ExampleEntity(event.transaction.from.toHex())
 
         // Entity fields can be set using simple assignments

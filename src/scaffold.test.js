@@ -163,7 +163,7 @@ export function handleExampleEvent(event: ExampleEvent): void {
 
   // Entities only exist after they have been saved to the store;
   // \`null\` checks allow to create entities on demand
-  if (entity == null) {
+  if (!entity) {
     entity = new ExampleEntity(event.transaction.from.toHex())
 
     // Entity fields can be set using simple assignments

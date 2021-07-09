@@ -20,22 +20,24 @@ export class MyEntity extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save MyEntity entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save MyEntity entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("MyEntity", id.toString(), this);
+    assert(id != null, "Cannot save MyEntity entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save MyEntity entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("MyEntity", id.toString(), this);
+    }
   }
 
   static load(id: string): MyEntity | null {
-    return store.get("MyEntity", id) as MyEntity | null;
+    return changetype<MyEntity | null>(store.get("MyEntity", id));
   }
 
   get id(): string {
     let value = this.get("id");
-    return value.toString();
+    return value!.toString();
   }
 
   set id(value: string) {

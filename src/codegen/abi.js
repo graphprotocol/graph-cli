@@ -271,19 +271,22 @@ module.exports = class AbiCodeGenerator {
     let tupleClassName = tupleIdentifier + 'Struct'
     let tupleClasses = []
 
+    let isTupleType = util.isTupleType(type)
+    let returnValue = typesCodegen.ethereumToAsc(
+      parentType === 'tuple'
+      ? `this[${index}]`
+      : `this._${parentType}.${parentField}[${index}].value`,
+      type,
+      tupleClassName,
+    )
+
     // Generate getter for parent class
     let tupleGetter = tsCodegen.method(
       `get ${name}`,
       [],
       util.isTupleArrayType(type) ? `Array<${tupleClassName}>` : tupleClassName,
       `
-      return ${typesCodegen.ethereumToAsc(
-        parentType === 'tuple'
-          ? `this[${index}]`
-          : `this._${parentType}.${parentField}[${index}].value`,
-        type,
-        tupleClassName,
-      )}${util.isTupleType(type) ? ` as ${tupleClassName}` : ''}
+      return ${isTupleType ? `changetype<${tupleClassName}>(${returnValue})` : `${returnValue}`}
       `,
     )
 

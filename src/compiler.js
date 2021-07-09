@@ -282,6 +282,10 @@ class Compiler {
 
       asc.main(
         [
+          '--explicitStart',
+          '--exportRuntime',
+          '--runtime',
+          'stub',
           inputFile,
           global,
           '--baseDir',
@@ -364,6 +368,10 @@ class Compiler {
 
       asc.main(
         [
+          '--explicitStart',
+          '--exportRuntime',
+          '--runtime',
+          'stub',
           inputFile,
           global,
           '--baseDir',

@@ -9,8 +9,8 @@
     "deploy-test": "graph deploy test/basic-event-handlers --ipfs http://localhost:15001 --node http://127.0.0.1:18020"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.20.0",
-    "@graphprotocol/graph-ts": "^0.20.0",
+    "@graphprotocol/graph-cli": "https://github.com/graphprotocol/graph-cli#otavio/update-assembly-script",
+    "@graphprotocol/graph-ts": "https://github.com/graphprotocol/graph-ts#otavio/update-assembly-script",
     "apollo-fetch": "^0.7.0"
   },
   "dependencies": {
@@ -20,6 +20,6 @@
     "truffle-hdwallet-provider": "^1.0.4"
   },
   "resolutions": {
-    "assemblyscript": "git+https://github.com/AssemblyScript/assemblyscript.git#v0.6"
+    "assemblyscript": "0.19.2"
   }
 }
