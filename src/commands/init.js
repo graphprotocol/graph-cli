@@ -35,7 +35,7 @@ ${chalk.dim('Choose mode with one of:')}
 ${chalk.dim('Options for --from-contract:')}
 
       --abi <path>              Path to the contract ABI (default: download from Etherscan)
-      --network <mainnet|kovan|rinkeby|ropsten|goerli|poa-core|poa-sokol|xdai|matic|mumbai|fantom|bsc|clover|arbitrum-testnet-v5>
+      --network <mainnet|kovan|rinkeby|ropsten|goerli|poa-core|poa-sokol|xdai|matic|mumbai|fantom|bsc|clover|arbitrum-testnet-v5|arbitrum-one>
                                 Selects the network the contract is deployed to
       --index-events            Index contract events as entities
       --contract-name           Name of the contract (default: Contract)      
@@ -72,6 +72,7 @@ const processInitForm = async (
     'bsc',
     'clover',
     'arbitrum-testnet-v5',
+    'arbitrum-one'
   ]
   let addressPattern = /^(0x)?[0-9a-fA-F]{40}$/
 
