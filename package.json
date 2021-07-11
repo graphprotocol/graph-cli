@@ -27,6 +27,7 @@
   "bin": {
     "graph": "bin/graph"
   },
+  "main": "src/cli",
   "devDependencies": {
     "eslint": "^6.0.1",
     "jest": "^26.0.0",
