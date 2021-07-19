@@ -28,7 +28,7 @@
     "graph": "bin/graph"
   },
   "devDependencies": {
-    "eslint": "^6.0.1",
+    "eslint": "^7.31.0",
     "jest": "^26.0.0",
     "spawn-command": "^0.0.2-1",
     "strip-ansi": "^6.0.0",
