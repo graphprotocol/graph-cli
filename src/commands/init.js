@@ -260,11 +260,24 @@ const loadAbiFromEtherscan = async (network, address) =>
     `Failed to fetch ABI from Etherscan`,
     `Warnings while fetching ABI from Etherscan`,
     async spinner => {
-      let result = await fetch(
-        `https://${
-          network === 'mainnet' ? 'api' : `api-${network}`
-        }.etherscan.io/api?module=contract&action=getabi&address=${address}`,
-      )
+      let url = '';
+
+      switch (network) {
+        case 'mainnet':
+          url = `https://api.etherscan.io/api?module=contract&action=getabi&address=${address}`;
+          break;
+        case 'bsc':
+          url = `https://api.bscscan.com/api?module=contract&action=getabi&address=${address}`;
+          break;
+        case 'matic':
+          url = `https://api.polygonscan.com/api?module=contract&action=getabi&address=${address}`;
+          break;
+        default:
+          url = `api-${network}.etherscan.io/api?module=contract&action=getabi&address=${address}`;
+          break
+      }
+
+      let result = await fetch(url);
       let json = await result.json()
 
       // Etherscan returns a JSON object that has a `status`, a `message` and
